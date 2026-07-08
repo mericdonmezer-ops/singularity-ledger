@@ -1,0 +1,1974 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Singularity — Verified Decision Ledger</title>
+<style>
+:root{--bg:#0b1120;--panel:#111a2e;--border:#1e2a44;--text:#dbe4f3;--muted:#7e8ba3;--accent:#38bdf8;--pos:#34d399;--neg:#f87171;--warn:#fbbf24}
+*{box-sizing:border-box}body{font-family:system-ui,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);margin:0;line-height:1.55}
+.wrap{max-width:1100px;margin:0 auto;padding:2rem 1.25rem 4rem}
+header h1{font-size:1.7rem;margin:0 0 .3rem}header p.tag{color:var(--muted);margin:0 0 1rem;max-width:70ch}
+a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
+.grid{display:grid;gap:1rem;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));margin:1.5rem 0}
+.stat{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:1rem}
+.stat .v{font-size:1.5rem;font-weight:700}.stat .k{color:var(--muted);font-size:.8rem;text-transform:uppercase;letter-spacing:.05em}
+h2{font-size:1.15rem;margin:2.2rem 0 .6rem;border-bottom:1px solid var(--border);padding-bottom:.4rem}
+.card{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:1rem;margin:.6rem 0}
+.badge{display:inline-block;font-size:.68rem;font-weight:700;padding:.12rem .45rem;border-radius:5px;letter-spacing:.04em}
+.badge.live{background:#064e3b;color:#6ee7b7}.badge.archive{background:#3f3355;color:#c4b5fd}
+.badge.type-forecast{background:#1e3a5f;color:#7dd3fc}.badge.type-reject{background:#4a1d1d;color:#fca5a5}
+.badge.type-exit{background:#4a3208;color:#fcd34d}.badge.type-action{background:#123c34;color:#5eead4}.badge.type-catalyst{background:#312e58;color:#a5b4fc}
+table{width:100%;border-collapse:collapse;font-size:.85rem;margin-top:.6rem}
+th,td{border-bottom:1px solid var(--border);padding:.45rem .5rem;text-align:left;vertical-align:top}
+th{color:var(--muted);font-weight:600;font-size:.75rem;text-transform:uppercase;letter-spacing:.05em;position:sticky;top:0;background:var(--bg)}
+td.stmt{max-width:420px;color:#b6c2d9}.pos{color:var(--pos)}.neg{color:var(--neg)}.muted{color:var(--muted)}.small{font-size:.8rem}
+.receipts{display:grid;gap:.8rem;grid-template-columns:repeat(auto-fit,minmax(300px,1fr))}
+.receipt-head{margin-bottom:.35rem}.receipt-metric{font-weight:700;margin-bottom:.35rem}
+.receipt-statement{font-size:.83rem;color:#b6c2d9}
+.spark{display:flex;align-items:flex-end;gap:.5rem;height:100px;padding:.5rem 0}
+.spark-col{display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%}
+.spark-bar{width:26px;border-radius:3px 3px 0 0}.spark-bar.good{background:var(--pos)}.spark-bar.ok{background:var(--warn)}.spark-bar.bad{background:var(--neg)}
+.spark-label{font-size:.65rem;color:var(--muted);margin-top:.3rem}
+.integrity{font-family:ui-monospace,Consolas,monospace;font-size:.75rem;word-break:break-all;color:var(--muted)}
+.tier-note{background:#0f1c33;border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:8px;padding:.8rem 1rem;font-size:.87rem;margin:1rem 0}
+.controls{display:flex;gap:.5rem;flex-wrap:wrap;margin:.8rem 0}
+.controls button{background:var(--panel);border:1px solid var(--border);color:var(--text);border-radius:7px;padding:.35rem .8rem;font-size:.8rem;cursor:pointer}
+.controls button.active{border-color:var(--accent);color:var(--accent)}
+</style></head><body><div class="wrap">
+<header>
+<h1>Verified Decision Ledger</h1>
+<p class="tag">Every decision this system makes — buys, sells, <strong>rejections</strong>, and probabilistic forecasts — published with a timestamp, then graded mechanically against market outcomes. Nothing is edited, nothing is deleted, and the misses stay on the page. Integrity is enforced by a hash chain and public git history, not by trust.</p>
+</header>
+
+<div class="tier-note"><strong>Two tiers, honestly labeled.</strong>
+<span class="badge live">LIVE</span> records entered the chain <em>before</em> their outcome was knowable — that is the verifiable claim.
+<span class="badge archive">ARCHIVE</span> records are backfilled internal history published retroactively: real, unedited, but they cannot claim pre-registration. We label them instead of pretending.</div>
+
+<div class="grid">
+<div class="stat"><div class="v">1,453</div><div class="k">decisions on record</div></div>
+<div class="stat"><div class="v">0</div><div class="k">live (pre-registered)</div></div>
+<div class="stat"><div class="v">0.26</div><div class="k">Brier score (40 resolved)</div></div>
+<div class="stat"><div class="v">35%</div><div class="k">forecast hit rate</div></div>
+<div class="stat"><div class="v">489</div><div class="k">rejections graded</div></div>
+<div class="stat"><div class="v">341</div><div class="k">open — awaiting outcome</div></div>
+</div>
+
+<h2>Calibration over time</h2>
+<div class="spark"><div class="spark-col" title="2026-05: Brier 0.22 (n=8)">
+        <div class="spark-bar ok" style="height:32px"></div>
+        <div class="spark-label">26-05</div>
+      </div><div class="spark-col" title="2026-06: Brier 0.28 (n=32)">
+        <div class="spark-bar bad" style="height:40px"></div>
+        <div class="spark-label">26-06</div>
+      </div></div>
+  <p class="muted small">Brier score per month — lower is better. 0.25 = coin flip on 50% claims; below 0.18 is genuinely calibrated.</p>
+
+<h2>The receipts</h2>
+<p class="muted small">The section nobody else publishes: our worst confident calls, the rejections that saved money, and the winners we walked away from.</p>
+<h3 style="font-size:.95rem;margin:1rem 0 .2rem">Confident calls that missed</h3>
+<div class="receipts"><div class="card receipt">
+    <div class="receipt-head"><strong>GOLD</strong> · 2026-05-28 · <span class="badge type-forecast">FORECAST</span> <span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></div>
+    <div class="receipt-metric">stated 60% → MISS</div>
+    <div class="receipt-statement">Gold closes Thu 28-May between $4,395-4,450 (continued risk-on rotation + steady USD; well above ATR stop $4,168).</div>
+  </div><div class="card receipt">
+    <div class="receipt-head"><strong>GOLD</strong> · 2026-06-02 · <span class="badge type-forecast">FORECAST</span> <span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></div>
+    <div class="receipt-metric">stated 60% → MISS</div>
+    <div class="receipt-statement">Gold closes Tue 2-Jun between $4,520-4,610 (range-bound; stays below the $4,580 standing-trim trigger, well above $4,411 200d floor).</div>
+  </div><div class="card receipt">
+    <div class="receipt-head"><strong>GOLD</strong> · 2026-06-03 · <span class="badge type-forecast">FORECAST</span> <span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></div>
+    <div class="receipt-metric">stated 60% → MISS</div>
+    <div class="receipt-statement">Gold closes Tue 2-Jun between $4,520-4,610 (range-bound; stays below the $4,580 standing-trim trigger, well above $4,411 200d floor).</div>
+  </div><div class="card receipt">
+    <div class="receipt-head"><strong>GOLD</strong> · 2026-06-04 · <span class="badge type-forecast">FORECAST</span> <span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></div>
+    <div class="receipt-metric">stated 60% → MISS</div>
+    <div class="receipt-statement">Gold closes Tue 2-Jun between $4,520-4,610 (range-bound; stays below the $4,580 standing-trim trigger, well above $4,411 200d floor).</div>
+  </div><div class="card receipt">
+    <div class="receipt-head"><strong>GOLD</strong> · 2026-06-05 · <span class="badge type-forecast">FORECAST</span> <span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></div>
+    <div class="receipt-metric">stated 60% → MISS</div>
+    <div class="receipt-statement">Gold closes Tue 2-Jun between $4,520-4,610 (range-bound; stays below the $4,580 standing-trim trigger, well above $4,411 200d floor).</div>
+  </div></div>
+<h3 style="font-size:.95rem;margin:1.2rem 0 .2rem">Rejections that were right</h3>
+<div class="receipts"><div class="card receipt">
+    <div class="receipt-head"><strong>CRWD</strong> · 2026-06-03 · <span class="badge type-reject">REJECT</span> <span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></div>
+    <div class="receipt-metric">-77.86% in 20d after we said no</div>
+    <div class="receipt-statement">Top SP500 screener 97.9 (Information Technology). HOLD pending NVDA Wed AH outcome. AI-Semi cohort sympathy; entry day-after-print only if NVDA BEAT confirms cluster.</div>
+  </div><div class="card receipt">
+    <div class="receipt-head"><strong>CRWD</strong> · 2026-06-04 · <span class="badge type-reject">REJECT</span> <span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></div>
+    <div class="receipt-metric">-77.49% in 20d after we said no</div>
+    <div class="receipt-statement">Top SP500 screener 97.9 (Information Technology). HOLD pending NVDA Wed AH outcome. AI-Semi cohort sympathy; entry day-after-print only if NVDA BEAT confirms cluster.</div>
+  </div><div class="card receipt">
+    <div class="receipt-head"><strong>ASTC</strong> · 2026-06-01 · <span class="badge type-reject">REJECT</span> <span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></div>
+    <div class="receipt-metric">-77.37% in 20d after we said no</div>
+    <div class="receipt-statement">Extreme single-week momentum plus low-float / microcap profile. Pump-suspect FOMO-guard fires; no thesis-backed catalyst on file. AVOID until structural fundamentals develop or 6-week mean-revert pullback.</div>
+  </div><div class="card receipt">
+    <div class="receipt-head"><strong>CRWD</strong> · 2026-06-05 · <span class="badge type-reject">REJECT</span> <span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></div>
+    <div class="receipt-metric">-77.31% in 20d after we said no</div>
+    <div class="receipt-statement">Top SP500 screener 97.9 (Information Technology). HOLD pending NVDA Wed AH outcome. AI-Semi cohort sympathy; entry day-after-print only if NVDA BEAT confirms cluster.</div>
+  </div><div class="card receipt">
+    <div class="receipt-head"><strong>ASTC</strong> · 2026-06-04 · <span class="badge type-reject">REJECT</span> <span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></div>
+    <div class="receipt-metric">-74.69% in 20d after we said no</div>
+    <div class="receipt-statement">Extreme single-week momentum plus low-float / microcap profile. Pump-suspect FOMO-guard fires; no thesis-backed catalyst on file. AVOID until structural fundamentals develop or 6-week mean-revert pullback.</div>
+  </div></div>
+<h3 style="font-size:.95rem;margin:1.2rem 0 .2rem">Winners we missed (yes, really)</h3>
+<div class="receipts"><div class="card receipt">
+    <div class="receipt-head"><strong>FCEL</strong> · 2026-05-05 · <span class="badge type-reject">REJECT</span> <span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></div>
+    <div class="receipt-metric">+87.4% in 20d after we said no</div>
+    <div class="receipt-statement">FuelCell Energy — distributed power generation, AI-power-bottleneck adjacency. Pump-suspect signature (high screener rank with extreme momentum). Better power-bottleneck plays held in portfolio (NNE moonshot).</div>
+  </div><div class="card receipt">
+    <div class="receipt-head"><strong>VSH</strong> · 2026-05-13 · <span class="badge type-reject">REJECT</span> <span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></div>
+    <div class="receipt-metric">+85.82% in 20d after we said no</div>
+    <div class="receipt-statement">Vishay — passive components, AI-Semi adjacent. Sector cap blocks.</div>
+  </div><div class="card receipt">
+    <div class="receipt-head"><strong>FCEL</strong> · 2026-05-04 · <span class="badge type-reject">REJECT</span> <span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></div>
+    <div class="receipt-metric">+83.32% in 20d after we said no</div>
+    <div class="receipt-statement">FuelCell Energy — distributed power generation, AI-power-bottleneck adjacency. Pump-suspect signature (high screener rank with extreme momentum). Better power-bottleneck plays held in portfolio (NNE moonshot).</div>
+  </div><div class="card receipt">
+    <div class="receipt-head"><strong>MXL</strong> · 2026-04-29 · <span class="badge type-reject">REJECT</span> <span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></div>
+    <div class="receipt-metric">+82.39% in 20d after we said no</div>
+    <div class="receipt-statement">Chase EXTREME. Screener #1 (99.9). $60.32 +130% 5d / +252% 20d. Vertical spike on broadband + AI networking narrative. Even quality story doesn't survive entry at 99th percentile momentum. Wait min 30d pullback.</div>
+  </div><div class="card receipt">
+    <div class="receipt-head"><strong>FCEL</strong> · 2026-05-06 · <span class="badge type-reject">REJECT</span> <span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></div>
+    <div class="receipt-metric">+80.07% in 20d after we said no</div>
+    <div class="receipt-statement">FuelCell Energy moonshot (98.7). Moonshot 8/8 at cap.</div>
+  </div></div>
+
+<h2>Sell-side honesty</h2>
+<p class="small">Of 31 graded exits: <strong>17</strong> dodged a further drawdown (price kept falling after we sold) · <strong>3</strong> were churn (price ran ≥10% after we sold) · mean post-exit +20d move: <span class="pos">+0.13%</span>.</p>
+<p class="small">Of 489 graded rejections: mean +20d forward return of what we said no to: <span class="pos">+0.69%</span> · correct avoids: <strong>168</strong> · missed winners: <strong>131</strong>.</p>
+
+<h2>Recent decisions <span class="muted small">(latest 200 of 1,453 — full set in <a href="ledger.json">ledger.json</a>)</span></h2>
+<div class="controls" id="filters">
+<button data-f="ALL" class="active">All</button>
+<button data-f="FORECAST">Forecasts</button>
+<button data-f="ACTION">Actions</button>
+<button data-f="EXIT">Exits</button>
+<button data-f="REJECT">Rejections</button>
+<button data-f="LIVE">LIVE only</button>
+</div>
+<table id="ledger"><thead><tr>
+<th>Decided</th><th>Type</th><th>Tier</th><th>Ticker</th><th>Action / claim</th><th>Ref</th><th>Status</th><th>+20d</th><th>Result</th>
+</tr></thead><tbody>
+<tr data-type="CATALYST" data-tier="ARCHIVE">
+<td>2026-07-08</td><td><span class="badge type-catalyst">CATALYST</span></td><td><span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></td>
+<td><strong>XOM</strong></td>
+<td class="stmt"><strong>DEFENSIVE_CYCLE_GATE</strong> — Permian + Guyana + LNG triple-engine; capital discipline returns &gt;$30B/yr to shareholders; Brent floor near $75 supports buybacks.</td>
+<td>$137.09</td>
+<td><span class="muted">OPEN</span></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr data-type="ACTION" data-tier="ARCHIVE">
+<td>2026-07-08</td><td><span class="badge type-action">ACTION</span></td><td><span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></td>
+<td><strong>WOLF</strong></td>
+<td class="stmt"><strong>TRIM</strong> — EV ledger #19 EV 11.8% (LOW). TRIM 20/[n] sh per fired branch — keep 40 riding structural floor.</td>
+<td>$40</td>
+<td><span class="muted">OPEN</span></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr data-type="CATALYST" data-tier="ARCHIVE">
+<td>2026-07-08</td><td><span class="badge type-catalyst">CATALYST</span></td><td><span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></td>
+<td><strong>WOLF</strong></td>
+<td class="stmt"><strong>CRITICAL_TIER_FLOOR</strong> — HOLD [n] sh ÔÇö Critical-tier (gain +232%) requires named structural floor in addition to moonshot HEALTH_CHECK. NO standing stop today (cushion to thesis-collapse depth fails stop-only-on-real-risk Q3); manual review on named triggers.</td>
+<td>$40</td>
+<td><span class="muted">OPEN</span></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr data-type="REJECT" data-tier="ARCHIVE">
+<td>2026-07-08</td><td><span class="badge type-reject">REJECT</span></td><td><span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></td>
+<td><strong>WGS</strong></td>
+<td class="stmt"><strong>REJECT (beyondCash / queued)</strong> — Genomic diagnostics; healthcare rotation beneficiary. RED brake + Q3 print pending; not deployable today.</td>
+<td>—</td>
+<td><span class="muted" title="Outcome could not be fetched (delisted / symbol gone)">UNRESOLVABLE</span></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr data-type="ACTION" data-tier="ARCHIVE">
+<td>2026-07-08</td><td><span class="badge type-action">ACTION</span></td><td><span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></td>
+<td><strong>VKTX</strong></td>
+<td class="stmt"><strong>BUY</strong> — EV ledger #11 EV 16.5% (LOW). Toehold $700 — cohort bet, LOW conf caps size.</td>
+<td>$42.13</td>
+<td><span class="muted">OPEN</span></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr data-type="CATALYST" data-tier="ARCHIVE">
+<td>2026-07-08</td><td><span class="badge type-catalyst">CATALYST</span></td><td><span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></td>
+<td><strong>UMC</strong></td>
+<td class="stmt"><strong>ADD_WATCH</strong> — HOLD ÔÇö winner emerging in surf bucket, graduated to Major-tier (gain +32%). Continue thesis-trail with surf -14% mechanical stop active. Re-evaluate at next Q earnings.</td>
+<td>$24.54</td>
+<td><span class="muted">OPEN</span></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr data-type="CATALYST" data-tier="ARCHIVE">
+<td>2026-07-08</td><td><span class="badge type-catalyst">CATALYST</span></td><td><span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></td>
+<td><strong>TTE</strong></td>
+<td class="stmt"><strong>DEFENSIVE_CYCLE_GATE</strong> — EU integrated supermajor; LNG + renewables transition pace; ~5% dividend yield; balance sheet supports through-cycle.</td>
+<td>$66.94</td>
+<td><span class="muted">OPEN</span></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr data-type="CATALYST" data-tier="ARCHIVE">
+<td>2026-07-08</td><td><span class="badge type-catalyst">CATALYST</span></td><td><span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></td>
+<td><strong>TSM</strong></td>
+<td class="stmt"><strong>ADD_WATCH</strong> — WATCH ONLY ÔÇö no order placed, AI-cluster cap blocks new BUYs</td>
+<td>$434.16</td>
+<td><span class="muted">OPEN</span></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr data-type="REJECT" data-tier="ARCHIVE">
+<td>2026-07-08</td><td><span class="badge type-reject">REJECT</span></td><td><span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></td>
+<td><strong>TNGX</strong></td>
+<td class="stmt"><strong>REJECT (beyondCash / queued)</strong> — Biotech catalyst. Screener #4. +34% 20d = chase risk. Below 70 threshold. Monitor for pullback entry.</td>
+<td>—</td>
+<td><span class="muted" title="Outcome could not be fetched (delisted / symbol gone)">UNRESOLVABLE</span></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr data-type="ACTION" data-tier="ARCHIVE">
+<td>2026-07-08</td><td><span class="badge type-action">ACTION</span></td><td><span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></td>
+<td><strong>TMC</strong></td>
+<td class="stmt"><strong>SELL</strong> — EV ledger #46 EV 5.0% (LOW). No thesis + regulatory binary we have no edge on + moonshot sleeve over-cap.</td>
+<td>$4.23</td>
+<td><span class="muted">OPEN</span></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr data-type="REJECT" data-tier="ARCHIVE">
+<td>2026-07-08</td><td><span class="badge type-reject">REJECT</span></td><td><span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></td>
+<td><strong>SUPV</strong></td>
+<td class="stmt"><strong>REJECT (beyondCash / queued)</strong> — Argentina-Milei reflation cohort with BBAR/BMA/GGAL. Already extended; broker-mark RED brake blocks specs.</td>
+<td>—</td>
+<td><span class="muted" title="Outcome could not be fetched (delisted / symbol gone)">UNRESOLVABLE</span></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr data-type="FORECAST" data-tier="ARCHIVE">
+<td>2026-07-08</td><td><span class="badge type-forecast">FORECAST</span></td><td><span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></td>
+<td><strong>—</strong></td>
+<td class="stmt"><strong>FORECAST</strong></td>
+<td>—</td>
+<td><span class="muted">OPEN</span></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr data-type="ACTION" data-tier="ARCHIVE">
+<td>2026-07-08</td><td><span class="badge type-action">ACTION</span></td><td><span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></td>
+<td><strong>RL</strong></td>
+<td class="stmt"><strong>SELL</strong> — EV ledger #53 EV 2.5% (LOW). Bottom quintile, no thesis, no catalyst.</td>
+<td>$398.22</td>
+<td><span class="muted">OPEN</span></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr data-type="CATALYST" data-tier="ARCHIVE">
+<td>2026-07-08</td><td><span class="badge type-catalyst">CATALYST</span></td><td><span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></td>
+<td><strong>RGTI</strong></td>
+<td class="stmt"><strong>THESIS_VALIDATION_GATE</strong> — Superconducting quantum (Rigetti). Q1 print 12-May was a beat; now +37% on cost ($18.63) → Major tier, requires named mechanism. Smaller/higher-beta than IONQ within the sleeve.</td>
+<td>$17.94</td>
+<td><span class="muted">OPEN</span></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr data-type="CATALYST" data-tier="ARCHIVE">
+<td>2026-07-08</td><td><span class="badge type-catalyst">CATALYST</span></td><td><span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></td>
+<td><strong>QUBT</strong></td>
+<td class="stmt"><strong>SKIP_LOCK</strong> — DO NOT BUY ÔÇö skipped from quantum sleeve</td>
+<td>—</td>
+<td><span class="muted" title="Outcome could not be fetched (delisted / symbol gone)">UNRESOLVABLE</span></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr data-type="ACTION" data-tier="ARCHIVE">
+<td>2026-07-08</td><td><span class="badge type-action">ACTION</span></td><td><span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></td>
+<td><strong>QCOM</strong></td>
+<td class="stmt"><strong>SELL</strong> — EV ledger #50 EV 3.6% (LOW). Bottom quintile, -16%, no falsifier, no catalyst on file.</td>
+<td>$176.25</td>
+<td><span class="muted">OPEN</span></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr data-type="CATALYST" data-tier="ARCHIVE">
+<td>2026-07-08</td><td><span class="badge type-catalyst">CATALYST</span></td><td><span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></td>
+<td><strong>PFE</strong></td>
+<td class="stmt"><strong>DEFENSIVE_CYCLE_GATE</strong> — Patent cliff Q4 2026 priced in; pipeline + GLP-1 oral candidate (danuglipron) + Seagen ADC platform offset post-cliff revenue. Dividend yield ~6% supports holding through cliff.</td>
+<td>$24.32</td>
+<td><span class="muted">OPEN</span></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr data-type="ACTION" data-tier="ARCHIVE">
+<td>2026-07-08</td><td><span class="badge type-action">ACTION</span></td><td><span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></td>
+<td><strong>NNE</strong></td>
+<td class="stmt"><strong>SELL</strong> — EV ledger #54 EV 0.5% (LOW). No thesis + near-zero EV + sleeve over-cap.</td>
+<td>$20.03</td>
+<td><span class="muted">OPEN</span></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr data-type="CATALYST" data-tier="ARCHIVE">
+<td>2026-07-08</td><td><span class="badge type-catalyst">CATALYST</span></td><td><span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></td>
+<td><strong>MU</strong></td>
+<td class="stmt"><strong>STRUCTURAL_FLOOR</strong> — HOLD [n] sh ÔÇö second mechanism alongside mu-nvda-print-thesis-validation. MU is the system's largest single-position breach (14.48% weight, +200% gain, single-position-cap binding). Critical-tier dual-coverage per .cursor/rules/thesis-validation-coverage.mdc.</td>
+<td>$975.56</td>
+<td><span class="muted">OPEN</span></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr data-type="CATALYST" data-tier="ARCHIVE">
+<td>2026-07-08</td><td><span class="badge type-catalyst">CATALYST</span></td><td><span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></td>
+<td><strong>MU</strong></td>
+<td class="stmt"><strong>REDEPLOY_PLAN</strong> — MU went parabolic (+54% in 10 sessions post-NVDA-print ~$700-&gt;$1,080, on +324% cost) and became the single dominant line at 25.6% of equities / 18.9% grand total. Mkt cap $1.22T vs analyst avg target ~$684 (-37%); binary Q3 FY26 print 24-Jun (guide: rev ~$33.5B, GM ~81%, EPS ~$1…</td>
+<td>$975.56</td>
+<td><span class="muted">OPEN</span></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr data-type="ACTION" data-tier="ARCHIVE">
+<td>2026-07-08</td><td><span class="badge type-action">ACTION</span></td><td><span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></td>
+<td><strong>MRVL</strong></td>
+<td class="stmt"><strong>SELL</strong> — EV ledger #26 EV 9.3% (LOW). Theme consolidation: photonics exposure lives in CRDO+COHR. Re-entry allowed ONLY via photonics deep-dive single-vehicle decision at anchor size.</td>
+<td>$245.29</td>
+<td><span class="muted">OPEN</span></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr data-type="ACTION" data-tier="ARCHIVE">
+<td>2026-07-08</td><td><span class="badge type-action">ACTION</span></td><td><span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></td>
+<td><strong>MIDD</strong></td>
+<td class="stmt"><strong>SELL</strong> — EV ledger #51 EV 2.5% (LOW). Day-30 default is CULL unless industrial thesis appears. Bottom quintile.</td>
+<td>$175.12</td>
+<td><span class="muted">OPEN</span></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr data-type="ACTION" data-tier="ARCHIVE">
+<td>2026-07-08</td><td><span class="badge type-action">ACTION</span></td><td><span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></td>
+<td><strong>MAX</strong></td>
+<td class="stmt"><strong>BUY</strong> — EV ledger #23 EV 10.5% (LOW). Toehold $700.</td>
+<td>$13.67</td>
+<td><span class="muted">OPEN</span></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr data-type="ACTION" data-tier="ARCHIVE">
+<td>2026-07-08</td><td><span class="badge type-action">ACTION</span></td><td><span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></td>
+<td><strong>LUNR</strong></td>
+<td class="stmt"><strong>TRIM</strong> — EV ledger #9 EV 19.5% (LOW). TRIM 25/[n] sh — keep 30 for NSNS award optionality (lunr-nasa-contract-watch to 2027).</td>
+<td>$19.58</td>
+<td><span class="muted">OPEN</span></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr data-type="CATALYST" data-tier="ARCHIVE">
+<td>2026-07-08</td><td><span class="badge type-catalyst">CATALYST</span></td><td><span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></td>
+<td><strong>LUNR</strong></td>
+<td class="stmt"><strong>CYCLE_GATE</strong> — NASA CLPS (Commercial Lunar Payload Services) primary contractor with $719M cumulative awards through IM-4. Artemis-program-adjacent revenue stream; private lunar mission TAM expansion 2026-2030. Q1 2026 print showed margin discipline (gross margin -0.4% to +3.2% improving). Cat…</td>
+<td>$19.58</td>
+<td><span class="muted">OPEN</span></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr data-type="CATALYST" data-tier="ARCHIVE">
+<td>2026-07-08</td><td><span class="badge type-catalyst">CATALYST</span></td><td><span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></td>
+<td><strong>LLY</strong></td>
+<td class="stmt"><strong>DEFENSIVE_CYCLE_GATE</strong> — GLP-1 (Mounjaro/Zepbound) adoption still accelerating; manufacturing constraint relief 2026 unlocks volume; obesity TAM far from saturated.</td>
+<td>$1213.91</td>
+<td><span class="muted">OPEN</span></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr data-type="CATALYST" data-tier="ARCHIVE">
+<td>2026-07-08</td><td><span class="badge type-catalyst">CATALYST</span></td><td><span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></td>
+<td><strong>8058.T</strong></td>
+<td class="stmt"><strong>BUY_WATCH</strong> — Sogo shosha re-rating thesis (Buffett-validated): (a) Berkshire Hathaway ~$24B exposure across 5 trading houses (2024-25 disclosure), increased stake in 2024 against original 9.9% promise, (b) ROE 15%+ (Mitsubishi 13%, Itochu 17%, Mitsui 14%) at P/E 9-12x = quality compounder pr…</td>
+<td>—</td>
+<td><span class="muted" title="Outcome could not be fetched (delisted / symbol gone)">UNRESOLVABLE</span></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr data-type="CATALYST" data-tier="ARCHIVE">
+<td>2026-07-08</td><td><span class="badge type-catalyst">CATALYST</span></td><td><span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></td>
+<td><strong>7011.T</strong></td>
+<td class="stmt"><strong>BUY_WATCH</strong> — Japan defense secular cycle: (a) ¥43 trillion 5-year defense plan FY23-FY27 (Cabinet approved Dec-2022) = +60% real spending vs prior 5y baseline, (b) Pacifist Article 9 reinterpretation enabling offensive missile capability + foreign weapon exports (Dec-2023), (c) AUKUS+ integr…</td>
+<td>—</td>
+<td><span class="muted" title="Outcome could not be fetched (delisted / symbol gone)">UNRESOLVABLE</span></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr data-type="CATALYST" data-tier="ARCHIVE">
+<td>2026-07-08</td><td><span class="badge type-catalyst">CATALYST</span></td><td><span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></td>
+<td><strong>IONQ</strong></td>
+<td class="stmt"><strong>THESIS_VALIDATION_GATE</strong> — Trapped-ion quantum leader. Q1 rev $64.7M (+755% YoY), RPO $470M, DARPA HARQ + Air Force contracts. Now +61% on blended cost ($44.67) → Major tier, requires named mechanism per thesis-validation-coverage.</td>
+<td>$49.12</td>
+<td><span class="muted">OPEN</span></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr data-type="CATALYST" data-tier="ARCHIVE">
+<td>2026-07-08</td><td><span class="badge type-catalyst">CATALYST</span></td><td><span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></td>
+<td><strong>HUM</strong></td>
+<td class="stmt"><strong>DEFENSIVE_CYCLE_GATE</strong> — 2025 MA medical-cost shock + star-rating downgrade priced in. 2026 plan-year repricing (benefit trims, premium increases) + star-rating recovery path normalizes medical-loss ratio toward target. +32% rebound reflects early margin-recovery confirmation; thesis is multi-quarter ML…</td>
+<td>$396.75</td>
+<td><span class="muted">OPEN</span></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr data-type="REJECT" data-tier="ARCHIVE">
+<td>2026-07-08</td><td><span class="badge type-reject">REJECT</span></td><td><span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></td>
+<td><strong>HAE</strong></td>
+<td class="stmt"><strong>REJECT (beyondCash / queued)</strong> — Medical device breakout. Screener #2. But +50% in 20d = chase risk — non-IT, so cap-eligible, but wait for a 5-10% pullback rather than chase. Drawdown brake clear.</td>
+<td>—</td>
+<td><span class="muted" title="Outcome could not be fetched (delisted / symbol gone)">UNRESOLVABLE</span></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr data-type="ACTION" data-tier="ARCHIVE">
+<td>2026-07-08</td><td><span class="badge type-action">ACTION</span></td><td><span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></td>
+<td><strong>GEV</strong></td>
+<td class="stmt"><strong>BUY</strong> — EV ledger #12 EV 16.3% (MED). Anchor starter $1K at 0.75x YELLOW sizing; build toward $2-3K on gate pass.</td>
+<td>—</td>
+<td><span class="muted" title="Outcome could not be fetched (delisted / symbol gone)">UNRESOLVABLE</span></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr data-type="CATALYST" data-tier="ARCHIVE">
+<td>2026-07-08</td><td><span class="badge type-catalyst">CATALYST</span></td><td><span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></td>
+<td><strong>FAC</strong></td>
+<td class="stmt"><strong>HOLD_LOCK</strong> — HOLD [n] sh Factorial Energy (received via CGCT de-SPAC merger 09-Jun). Pre-revenue solid-state EV battery moonshot, $1,600 / 0.85% weight. No add, no reflexive trim.</td>
+<td>$10.24</td>
+<td><span class="muted">OPEN</span></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr data-type="CATALYST" data-tier="ARCHIVE">
+<td>2026-07-08</td><td><span class="badge type-catalyst">CATALYST</span></td><td><span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></td>
+<td><strong>EOG</strong></td>
+<td class="stmt"><strong>DEFENSIVE_CYCLE_GATE</strong> — Premium-rock E&amp;P; lowest break-even in US shale (~$45 WTI); special dividends amplify yield; Eagle Ford + Delaware basin.</td>
+<td>$130.78</td>
+<td><span class="muted">OPEN</span></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr data-type="CATALYST" data-tier="ARCHIVE">
+<td>2026-07-08</td><td><span class="badge type-catalyst">CATALYST</span></td><td><span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></td>
+<td><strong>COP</strong></td>
+<td class="stmt"><strong>DEFENSIVE_CYCLE_GATE</strong> — US shale pure-play (Permian + Eagle Ford + Bakken); $20B+ buyback authorization; Marathon Oil acquisition synergies.</td>
+<td>$104.73</td>
+<td><span class="muted">OPEN</span></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr data-type="CATALYST" data-tier="ARCHIVE">
+<td>2026-07-08</td><td><span class="badge type-catalyst">CATALYST</span></td><td><span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></td>
+<td><strong>CECO</strong></td>
+<td class="stmt"><strong>HOLD_LOCK</strong> — HOLD — surf-origin BUY (Apr-30 $700) now +30% → crossed into Major-tier on gain. No standing stop per stop-only-on-real-risk (winner on healthy trend, no dated bearish signal). Thesis-trail.</td>
+<td>$82.15</td>
+<td><span class="muted">OPEN</span></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr data-type="CATALYST" data-tier="ARCHIVE">
+<td>2026-07-08</td><td><span class="badge type-catalyst">CATALYST</span></td><td><span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></td>
+<td><strong>BTI</strong></td>
+<td class="stmt"><strong>HOLD_LOCK</strong> — HOLD [n] sh ÔÇö sistem rol├╝ AI cluster dengeleyici + dividend stream</td>
+<td>$61.77</td>
+<td><span class="muted">OPEN</span></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr data-type="ACTION" data-tier="ARCHIVE">
+<td>2026-07-08</td><td><span class="badge type-action">ACTION</span></td><td><span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></td>
+<td><strong>BRBR</strong></td>
+<td class="stmt"><strong>BUY</strong> — EV ledger #30 EV 7.8% (LOW). Toehold $700.</td>
+<td>$13.94</td>
+<td><span class="muted">OPEN</span></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr data-type="ACTION" data-tier="ARCHIVE">
+<td>2026-07-08</td><td><span class="badge type-action">ACTION</span></td><td><span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></td>
+<td><strong>BEN</strong></td>
+<td class="stmt"><strong>SELL</strong> — EV ledger #52 EV 2.5% (LOW). Bottom quintile — structural headwind + no thesis.</td>
+<td>$34.11</td>
+<td><span class="muted">OPEN</span></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr data-type="REJECT" data-tier="ARCHIVE">
+<td>2026-07-08</td><td><span class="badge type-reject">REJECT</span></td><td><span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></td>
+<td><strong>BBAR</strong></td>
+<td class="stmt"><strong>REJECT (beyondCash / queued)</strong> — Argentina-Milei reflation cohort (BBAR/BMA/GGAL/SUPV). Structural EM-reflation thesis credible but already extended; lower priority than core holds. Monitor cohort; no chase into the FOMC binary.</td>
+<td>—</td>
+<td><span class="muted" title="Outcome could not be fetched (delisted / symbol gone)">UNRESOLVABLE</span></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr data-type="CATALYST" data-tier="ARCHIVE">
+<td>2026-07-08</td><td><span class="badge type-catalyst">CATALYST</span></td><td><span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></td>
+<td><strong>AVGO</strong></td>
+<td class="stmt"><strong>CYCLE_GATE</strong> — AI ASIC monopoly: Google TPU silicon manufacturer-of-record, Meta MTIA, ByteDance ASIC, multiple Tier-2 hyperscaler engagements. AI revenue run-rate $14-18B FY26 (vs $4B FY24 actual). Networking duopoly (with NVDA): switching silicon for AI fabrics. VMware integration cross-sell…</td>
+<td>$360.45</td>
+<td><span class="muted">OPEN</span></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr data-type="CATALYST" data-tier="ARCHIVE">
+<td>2026-07-08</td><td><span class="badge type-catalyst">CATALYST</span></td><td><span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></td>
+<td><strong>PDN.AX</strong></td>
+<td class="stmt"><strong>BUY_WATCH</strong> — Nuclear renaissance structural setup: (a) Trump Nuclear EOs May-2025 (4 executive orders accelerating SMR/AP1000/microreactor approval timelines), (b) hyperscaler PPA bonanza 2024-25 (Microsoft Three Mile Island restart, Amazon Talen-Susquehanna, Google Kairos SMR, Meta nuclear…</td>
+<td>—</td>
+<td><span class="muted" title="Outcome could not be fetched (delisted / symbol gone)">UNRESOLVABLE</span></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr data-type="REJECT" data-tier="ARCHIVE">
+<td>2026-07-08</td><td><span class="badge type-reject">REJECT</span></td><td><span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></td>
+<td><strong>ATEX</strong></td>
+<td class="stmt"><strong>REJECT (beyondCash / queued)</strong> — Private 5G enterprise mid-cap; structural thesis credible but post run-up. Broker-mark RED brake blocks specs; revisit on pullback or Q3 print.</td>
+<td>$100.9</td>
+<td><span class="muted">OPEN</span></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr data-type="CATALYST" data-tier="ARCHIVE">
+<td>2026-07-08</td><td><span class="badge type-catalyst">CATALYST</span></td><td><span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></td>
+<td><strong>AMD</strong></td>
+<td class="stmt"><strong>CYCLE_GATE</strong> — HOLD [n] sh ÔÇö thesis-trail (no standing stop). Next dated gate: AMD Q2 FY26 print ~Aug-26.</td>
+<td>$517.82</td>
+<td><span class="muted">OPEN</span></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr data-type="CATALYST" data-tier="ARCHIVE">
+<td>2026-07-08</td><td><span class="badge type-catalyst">CATALYST</span></td><td><span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></td>
+<td><strong>ALOY</strong></td>
+<td class="stmt"><strong>HOLD_LOCK</strong> — HOLD REalloys — rare-earth/magnet-metals moonshot, +64% on cost. No add, no reflexive trim; thesis-trail per thesis-horizon-constitution.</td>
+<td>$13.28</td>
+<td><span class="muted">OPEN</span></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr data-type="ACTION" data-tier="ARCHIVE">
+<td>2026-07-08</td><td><span class="badge type-action">ACTION</span></td><td><span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></td>
+<td><strong>ALMS</strong></td>
+<td class="stmt"><strong>BUY</strong> — EV ledger #16 EV 13.5% (LOW). Toehold $700.</td>
+<td>$29.27</td>
+<td><span class="muted">OPEN</span></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr data-type="ACTION" data-tier="ARCHIVE">
+<td>2026-07-08</td><td><span class="badge type-action">ACTION</span></td><td><span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></td>
+<td><strong>ACHR</strong></td>
+<td class="stmt"><strong>SELL</strong> — EV ledger #55 EV -2.0% (LOW). Only negative-EV row in the book. No thesis, no floor, sleeve over-cap.</td>
+<td>$4.98</td>
+<td><span class="muted">OPEN</span></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr data-type="CATALYST" data-tier="ARCHIVE">
+<td>2026-07-07</td><td><span class="badge type-catalyst">CATALYST</span></td><td><span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></td>
+<td><strong>XOM</strong></td>
+<td class="stmt"><strong>DEFENSIVE_CYCLE_GATE</strong> — Permian + Guyana + LNG triple-engine; capital discipline returns &gt;$30B/yr to shareholders; Brent floor near $75 supports buybacks.</td>
+<td>$137.09</td>
+<td><span class="muted">OPEN</span></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr data-type="CATALYST" data-tier="ARCHIVE">
+<td>2026-07-07</td><td><span class="badge type-catalyst">CATALYST</span></td><td><span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></td>
+<td><strong>WOLF</strong></td>
+<td class="stmt"><strong>CRITICAL_TIER_FLOOR</strong> — HOLD [n] sh ÔÇö Critical-tier (gain +232%) requires named structural floor in addition to moonshot HEALTH_CHECK. NO standing stop today (cushion to thesis-collapse depth fails stop-only-on-real-risk Q3); manual review on named triggers.</td>
+<td>$40</td>
+<td><span class="muted">OPEN</span></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr data-type="REJECT" data-tier="ARCHIVE">
+<td>2026-07-07</td><td><span class="badge type-reject">REJECT</span></td><td><span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></td>
+<td><strong>WGS</strong></td>
+<td class="stmt"><strong>REJECT (beyondCash / queued)</strong> — Genomic diagnostics; healthcare rotation beneficiary. RED brake + Q3 print pending; not deployable today.</td>
+<td>—</td>
+<td><span class="muted" title="Outcome could not be fetched (delisted / symbol gone)">UNRESOLVABLE</span></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr data-type="CATALYST" data-tier="ARCHIVE">
+<td>2026-07-07</td><td><span class="badge type-catalyst">CATALYST</span></td><td><span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></td>
+<td><strong>UMC</strong></td>
+<td class="stmt"><strong>ADD_WATCH</strong> — HOLD ÔÇö winner emerging in surf bucket, graduated to Major-tier (gain +32%). Continue thesis-trail with surf -14% mechanical stop active. Re-evaluate at next Q earnings.</td>
+<td>$24.54</td>
+<td><span class="muted">OPEN</span></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr data-type="REJECT" data-tier="ARCHIVE">
+<td>2026-07-07</td><td><span class="badge type-reject">REJECT</span></td><td><span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></td>
+<td><strong>TWST</strong></td>
+<td class="stmt"><strong>REJECT (avoid / chase)</strong> — Synthetic-biology momentum on the healthcare rotation; chase risk on the run-up and below conviction for a fresh spec ahead of FOMC.</td>
+<td>$99.93</td>
+<td><span class="muted">OPEN</span></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr data-type="CATALYST" data-tier="ARCHIVE">
+<td>2026-07-07</td><td><span class="badge type-catalyst">CATALYST</span></td><td><span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></td>
+<td><strong>TTE</strong></td>
+<td class="stmt"><strong>DEFENSIVE_CYCLE_GATE</strong> — EU integrated supermajor; LNG + renewables transition pace; ~5% dividend yield; balance sheet supports through-cycle.</td>
+<td>$66.94</td>
+<td><span class="muted">OPEN</span></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr data-type="CATALYST" data-tier="ARCHIVE">
+<td>2026-07-07</td><td><span class="badge type-catalyst">CATALYST</span></td><td><span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></td>
+<td><strong>TSM</strong></td>
+<td class="stmt"><strong>ADD_WATCH</strong> — WATCH ONLY ÔÇö no order placed, AI-cluster cap blocks new BUYs</td>
+<td>$434.16</td>
+<td><span class="muted">OPEN</span></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr data-type="REJECT" data-tier="ARCHIVE">
+<td>2026-07-07</td><td><span class="badge type-reject">REJECT</span></td><td><span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></td>
+<td><strong>TNGX</strong></td>
+<td class="stmt"><strong>REJECT (beyondCash / queued)</strong> — Biotech catalyst. Screener #4. +34% 20d = chase risk. Below 70 threshold. Monitor for pullback entry.</td>
+<td>—</td>
+<td><span class="muted" title="Outcome could not be fetched (delisted / symbol gone)">UNRESOLVABLE</span></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr data-type="REJECT" data-tier="ARCHIVE">
+<td>2026-07-07</td><td><span class="badge type-reject">REJECT</span></td><td><span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></td>
+<td><strong>SUPV</strong></td>
+<td class="stmt"><strong>REJECT (beyondCash / queued)</strong> — Argentina-Milei reflation cohort with BBAR/BMA/GGAL. Already extended; broker-mark RED brake blocks specs.</td>
+<td>—</td>
+<td><span class="muted" title="Outcome could not be fetched (delisted / symbol gone)">UNRESOLVABLE</span></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr data-type="FORECAST" data-tier="ARCHIVE">
+<td>2026-07-07</td><td><span class="badge type-forecast">FORECAST</span></td><td><span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></td>
+<td><strong>—</strong></td>
+<td class="stmt"><strong>FORECAST</strong></td>
+<td>—</td>
+<td><span class="muted">OPEN</span></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr data-type="CATALYST" data-tier="ARCHIVE">
+<td>2026-07-07</td><td><span class="badge type-catalyst">CATALYST</span></td><td><span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></td>
+<td><strong>RGTI</strong></td>
+<td class="stmt"><strong>THESIS_VALIDATION_GATE</strong> — Superconducting quantum (Rigetti). Q1 print 12-May was a beat; now +37% on cost ($18.63) → Major tier, requires named mechanism. Smaller/higher-beta than IONQ within the sleeve.</td>
+<td>$17.94</td>
+<td><span class="muted">OPEN</span></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr data-type="CATALYST" data-tier="ARCHIVE">
+<td>2026-07-07</td><td><span class="badge type-catalyst">CATALYST</span></td><td><span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></td>
+<td><strong>QUBT</strong></td>
+<td class="stmt"><strong>SKIP_LOCK</strong> — DO NOT BUY ÔÇö skipped from quantum sleeve</td>
+<td>—</td>
+<td><span class="muted" title="Outcome could not be fetched (delisted / symbol gone)">UNRESOLVABLE</span></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr data-type="CATALYST" data-tier="ARCHIVE">
+<td>2026-07-07</td><td><span class="badge type-catalyst">CATALYST</span></td><td><span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></td>
+<td><strong>PFE</strong></td>
+<td class="stmt"><strong>DEFENSIVE_CYCLE_GATE</strong> — Patent cliff Q4 2026 priced in; pipeline + GLP-1 oral candidate (danuglipron) + Seagen ADC platform offset post-cliff revenue. Dividend yield ~6% supports holding through cliff.</td>
+<td>$24.32</td>
+<td><span class="muted">OPEN</span></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr data-type="CATALYST" data-tier="ARCHIVE">
+<td>2026-07-07</td><td><span class="badge type-catalyst">CATALYST</span></td><td><span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></td>
+<td><strong>MU</strong></td>
+<td class="stmt"><strong>STRUCTURAL_FLOOR</strong> — HOLD [n] sh ÔÇö second mechanism alongside mu-nvda-print-thesis-validation. MU is the system's largest single-position breach (14.48% weight, +200% gain, single-position-cap binding). Critical-tier dual-coverage per .cursor/rules/thesis-validation-coverage.mdc.</td>
+<td>$975.56</td>
+<td><span class="muted">OPEN</span></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr data-type="CATALYST" data-tier="ARCHIVE">
+<td>2026-07-07</td><td><span class="badge type-catalyst">CATALYST</span></td><td><span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></td>
+<td><strong>MU</strong></td>
+<td class="stmt"><strong>REDEPLOY_PLAN</strong> — MU went parabolic (+54% in 10 sessions post-NVDA-print ~$700-&gt;$1,080, on +324% cost) and became the single dominant line at 25.6% of equities / 18.9% grand total. Mkt cap $1.22T vs analyst avg target ~$684 (-37%); binary Q3 FY26 print 24-Jun (guide: rev ~$33.5B, GM ~81%, EPS ~$1…</td>
+<td>$975.56</td>
+<td><span class="muted">OPEN</span></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr data-type="CATALYST" data-tier="ARCHIVE">
+<td>2026-07-07</td><td><span class="badge type-catalyst">CATALYST</span></td><td><span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></td>
+<td><strong>LUNR</strong></td>
+<td class="stmt"><strong>CYCLE_GATE</strong> — NASA CLPS (Commercial Lunar Payload Services) primary contractor with $719M cumulative awards through IM-4. Artemis-program-adjacent revenue stream; private lunar mission TAM expansion 2026-2030. Q1 2026 print showed margin discipline (gross margin -0.4% to +3.2% improving). Cat…</td>
+<td>$19.58</td>
+<td><span class="muted">OPEN</span></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr data-type="CATALYST" data-tier="ARCHIVE">
+<td>2026-07-07</td><td><span class="badge type-catalyst">CATALYST</span></td><td><span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></td>
+<td><strong>LLY</strong></td>
+<td class="stmt"><strong>DEFENSIVE_CYCLE_GATE</strong> — GLP-1 (Mounjaro/Zepbound) adoption still accelerating; manufacturing constraint relief 2026 unlocks volume; obesity TAM far from saturated.</td>
+<td>$1213.91</td>
+<td><span class="muted">OPEN</span></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr data-type="CATALYST" data-tier="ARCHIVE">
+<td>2026-07-07</td><td><span class="badge type-catalyst">CATALYST</span></td><td><span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></td>
+<td><strong>8058.T</strong></td>
+<td class="stmt"><strong>BUY_WATCH</strong> — Sogo shosha re-rating thesis (Buffett-validated): (a) Berkshire Hathaway ~$24B exposure across 5 trading houses (2024-25 disclosure), increased stake in 2024 against original 9.9% promise, (b) ROE 15%+ (Mitsubishi 13%, Itochu 17%, Mitsui 14%) at P/E 9-12x = quality compounder pr…</td>
+<td>—</td>
+<td><span class="muted" title="Outcome could not be fetched (delisted / symbol gone)">UNRESOLVABLE</span></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr data-type="CATALYST" data-tier="ARCHIVE">
+<td>2026-07-07</td><td><span class="badge type-catalyst">CATALYST</span></td><td><span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></td>
+<td><strong>7011.T</strong></td>
+<td class="stmt"><strong>BUY_WATCH</strong> — Japan defense secular cycle: (a) ¥43 trillion 5-year defense plan FY23-FY27 (Cabinet approved Dec-2022) = +60% real spending vs prior 5y baseline, (b) Pacifist Article 9 reinterpretation enabling offensive missile capability + foreign weapon exports (Dec-2023), (c) AUKUS+ integr…</td>
+<td>—</td>
+<td><span class="muted" title="Outcome could not be fetched (delisted / symbol gone)">UNRESOLVABLE</span></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr data-type="CATALYST" data-tier="ARCHIVE">
+<td>2026-07-07</td><td><span class="badge type-catalyst">CATALYST</span></td><td><span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></td>
+<td><strong>IONQ</strong></td>
+<td class="stmt"><strong>THESIS_VALIDATION_GATE</strong> — Trapped-ion quantum leader. Q1 rev $64.7M (+755% YoY), RPO $470M, DARPA HARQ + Air Force contracts. Now +61% on blended cost ($44.67) → Major tier, requires named mechanism per thesis-validation-coverage.</td>
+<td>$49.12</td>
+<td><span class="muted">OPEN</span></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr data-type="CATALYST" data-tier="ARCHIVE">
+<td>2026-07-07</td><td><span class="badge type-catalyst">CATALYST</span></td><td><span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></td>
+<td><strong>HUM</strong></td>
+<td class="stmt"><strong>DEFENSIVE_CYCLE_GATE</strong> — 2025 MA medical-cost shock + star-rating downgrade priced in. 2026 plan-year repricing (benefit trims, premium increases) + star-rating recovery path normalizes medical-loss ratio toward target. +32% rebound reflects early margin-recovery confirmation; thesis is multi-quarter ML…</td>
+<td>$396.75</td>
+<td><span class="muted">OPEN</span></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr data-type="REJECT" data-tier="ARCHIVE">
+<td>2026-07-07</td><td><span class="badge type-reject">REJECT</span></td><td><span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></td>
+<td><strong>HAE</strong></td>
+<td class="stmt"><strong>REJECT (beyondCash / queued)</strong> — Medical device breakout. Screener #2. But +50% in 20d = chase risk — non-IT, so cap-eligible, but wait for a 5-10% pullback rather than chase. Drawdown brake clear.</td>
+<td>—</td>
+<td><span class="muted" title="Outcome could not be fetched (delisted / symbol gone)">UNRESOLVABLE</span></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr data-type="CATALYST" data-tier="ARCHIVE">
+<td>2026-07-07</td><td><span class="badge type-catalyst">CATALYST</span></td><td><span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></td>
+<td><strong>FAC</strong></td>
+<td class="stmt"><strong>HOLD_LOCK</strong> — HOLD [n] sh Factorial Energy (received via CGCT de-SPAC merger 09-Jun). Pre-revenue solid-state EV battery moonshot, $1,600 / 0.85% weight. No add, no reflexive trim.</td>
+<td>$10.24</td>
+<td><span class="muted">OPEN</span></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr data-type="CATALYST" data-tier="ARCHIVE">
+<td>2026-07-07</td><td><span class="badge type-catalyst">CATALYST</span></td><td><span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></td>
+<td><strong>EOG</strong></td>
+<td class="stmt"><strong>DEFENSIVE_CYCLE_GATE</strong> — Premium-rock E&amp;P; lowest break-even in US shale (~$45 WTI); special dividends amplify yield; Eagle Ford + Delaware basin.</td>
+<td>$130.78</td>
+<td><span class="muted">OPEN</span></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr data-type="CATALYST" data-tier="ARCHIVE">
+<td>2026-07-07</td><td><span class="badge type-catalyst">CATALYST</span></td><td><span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></td>
+<td><strong>COP</strong></td>
+<td class="stmt"><strong>DEFENSIVE_CYCLE_GATE</strong> — US shale pure-play (Permian + Eagle Ford + Bakken); $20B+ buyback authorization; Marathon Oil acquisition synergies.</td>
+<td>$104.73</td>
+<td><span class="muted">OPEN</span></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr data-type="CATALYST" data-tier="ARCHIVE">
+<td>2026-07-07</td><td><span class="badge type-catalyst">CATALYST</span></td><td><span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></td>
+<td><strong>CECO</strong></td>
+<td class="stmt"><strong>HOLD_LOCK</strong> — HOLD — surf-origin BUY (Apr-30 $700) now +30% → crossed into Major-tier on gain. No standing stop per stop-only-on-real-risk (winner on healthy trend, no dated bearish signal). Thesis-trail.</td>
+<td>$82.15</td>
+<td><span class="muted">OPEN</span></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr data-type="CATALYST" data-tier="ARCHIVE">
+<td>2026-07-07</td><td><span class="badge type-catalyst">CATALYST</span></td><td><span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></td>
+<td><strong>BTI</strong></td>
+<td class="stmt"><strong>HOLD_LOCK</strong> — HOLD [n] sh ÔÇö sistem rol├╝ AI cluster dengeleyici + dividend stream</td>
+<td>$61.77</td>
+<td><span class="muted">OPEN</span></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr data-type="REJECT" data-tier="ARCHIVE">
+<td>2026-07-07</td><td><span class="badge type-reject">REJECT</span></td><td><span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></td>
+<td><strong>BBAR</strong></td>
+<td class="stmt"><strong>REJECT (beyondCash / queued)</strong> — Argentina-Milei reflation cohort (BBAR/BMA/GGAL/SUPV). Structural EM-reflation thesis credible but already extended; lower priority than core holds. Monitor cohort; no chase into the FOMC binary.</td>
+<td>—</td>
+<td><span class="muted" title="Outcome could not be fetched (delisted / symbol gone)">UNRESOLVABLE</span></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr data-type="CATALYST" data-tier="ARCHIVE">
+<td>2026-07-07</td><td><span class="badge type-catalyst">CATALYST</span></td><td><span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></td>
+<td><strong>AVGO</strong></td>
+<td class="stmt"><strong>CYCLE_GATE</strong> — AI ASIC monopoly: Google TPU silicon manufacturer-of-record, Meta MTIA, ByteDance ASIC, multiple Tier-2 hyperscaler engagements. AI revenue run-rate $14-18B FY26 (vs $4B FY24 actual). Networking duopoly (with NVDA): switching silicon for AI fabrics. VMware integration cross-sell…</td>
+<td>$360.45</td>
+<td><span class="muted">OPEN</span></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr data-type="CATALYST" data-tier="ARCHIVE">
+<td>2026-07-07</td><td><span class="badge type-catalyst">CATALYST</span></td><td><span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></td>
+<td><strong>PDN.AX</strong></td>
+<td class="stmt"><strong>BUY_WATCH</strong> — Nuclear renaissance structural setup: (a) Trump Nuclear EOs May-2025 (4 executive orders accelerating SMR/AP1000/microreactor approval timelines), (b) hyperscaler PPA bonanza 2024-25 (Microsoft Three Mile Island restart, Amazon Talen-Susquehanna, Google Kairos SMR, Meta nuclear…</td>
+<td>—</td>
+<td><span class="muted" title="Outcome could not be fetched (delisted / symbol gone)">UNRESOLVABLE</span></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr data-type="REJECT" data-tier="ARCHIVE">
+<td>2026-07-07</td><td><span class="badge type-reject">REJECT</span></td><td><span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></td>
+<td><strong>ATEX</strong></td>
+<td class="stmt"><strong>REJECT (beyondCash / queued)</strong> — Private 5G enterprise mid-cap; structural thesis credible but post run-up. Broker-mark RED brake blocks specs; revisit on pullback or Q3 print.</td>
+<td>$106.04</td>
+<td><span class="muted">OPEN</span></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr data-type="CATALYST" data-tier="ARCHIVE">
+<td>2026-07-07</td><td><span class="badge type-catalyst">CATALYST</span></td><td><span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></td>
+<td><strong>AMD</strong></td>
+<td class="stmt"><strong>CYCLE_GATE</strong> — HOLD [n] sh ÔÇö thesis-trail (no standing stop). Next dated gate: AMD Q2 FY26 print ~Aug-26.</td>
+<td>$517.82</td>
+<td><span class="muted">OPEN</span></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr data-type="CATALYST" data-tier="ARCHIVE">
+<td>2026-07-07</td><td><span class="badge type-catalyst">CATALYST</span></td><td><span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></td>
+<td><strong>ALOY</strong></td>
+<td class="stmt"><strong>HOLD_LOCK</strong> — HOLD REalloys — rare-earth/magnet-metals moonshot, +64% on cost. No add, no reflexive trim; thesis-trail per thesis-horizon-constitution.</td>
+<td>$13.28</td>
+<td><span class="muted">OPEN</span></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr data-type="CATALYST" data-tier="ARCHIVE">
+<td>2026-07-06</td><td><span class="badge type-catalyst">CATALYST</span></td><td><span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></td>
+<td><strong>XOM</strong></td>
+<td class="stmt"><strong>DEFENSIVE_CYCLE_GATE</strong> — Permian + Guyana + LNG triple-engine; capital discipline returns &gt;$30B/yr to shareholders; Brent floor near $75 supports buybacks.</td>
+<td>$137.09</td>
+<td><span class="muted">OPEN</span></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr data-type="CATALYST" data-tier="ARCHIVE">
+<td>2026-07-06</td><td><span class="badge type-catalyst">CATALYST</span></td><td><span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></td>
+<td><strong>WOLF</strong></td>
+<td class="stmt"><strong>CRITICAL_TIER_FLOOR</strong> — HOLD [n] sh ÔÇö Critical-tier (gain +232%) requires named structural floor in addition to moonshot HEALTH_CHECK. NO standing stop today (cushion to thesis-collapse depth fails stop-only-on-real-risk Q3); manual review on named triggers.</td>
+<td>$40</td>
+<td><span class="muted">OPEN</span></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr data-type="REJECT" data-tier="ARCHIVE">
+<td>2026-07-06</td><td><span class="badge type-reject">REJECT</span></td><td><span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></td>
+<td><strong>WGS</strong></td>
+<td class="stmt"><strong>REJECT (beyondCash / queued)</strong> — Genomic diagnostics; healthcare rotation beneficiary. RED brake + Q3 print pending; not deployable today.</td>
+<td>—</td>
+<td><span class="muted" title="Outcome could not be fetched (delisted / symbol gone)">UNRESOLVABLE</span></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr data-type="CATALYST" data-tier="ARCHIVE">
+<td>2026-07-06</td><td><span class="badge type-catalyst">CATALYST</span></td><td><span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></td>
+<td><strong>UMC</strong></td>
+<td class="stmt"><strong>ADD_WATCH</strong> — HOLD ÔÇö winner emerging in surf bucket, graduated to Major-tier (gain +32%). Continue thesis-trail with surf -14% mechanical stop active. Re-evaluate at next Q earnings.</td>
+<td>$24.54</td>
+<td><span class="muted">OPEN</span></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr data-type="REJECT" data-tier="ARCHIVE">
+<td>2026-07-06</td><td><span class="badge type-reject">REJECT</span></td><td><span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></td>
+<td><strong>TWST</strong></td>
+<td class="stmt"><strong>REJECT (avoid / chase)</strong> — Synthetic-biology momentum on the healthcare rotation; chase risk on the run-up and below conviction for a fresh spec ahead of FOMC.</td>
+<td>$99.24</td>
+<td><span class="muted">OPEN</span></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr data-type="CATALYST" data-tier="ARCHIVE">
+<td>2026-07-06</td><td><span class="badge type-catalyst">CATALYST</span></td><td><span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></td>
+<td><strong>TTE</strong></td>
+<td class="stmt"><strong>DEFENSIVE_CYCLE_GATE</strong> — EU integrated supermajor; LNG + renewables transition pace; ~5% dividend yield; balance sheet supports through-cycle.</td>
+<td>$66.94</td>
+<td><span class="muted">OPEN</span></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr data-type="CATALYST" data-tier="ARCHIVE">
+<td>2026-07-06</td><td><span class="badge type-catalyst">CATALYST</span></td><td><span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></td>
+<td><strong>TSM</strong></td>
+<td class="stmt"><strong>ADD_WATCH</strong> — WATCH ONLY ÔÇö no order placed, AI-cluster cap blocks new BUYs</td>
+<td>$434.16</td>
+<td><span class="muted">OPEN</span></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr data-type="REJECT" data-tier="ARCHIVE">
+<td>2026-07-06</td><td><span class="badge type-reject">REJECT</span></td><td><span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></td>
+<td><strong>TNGX</strong></td>
+<td class="stmt"><strong>REJECT (beyondCash / queued)</strong> — Biotech catalyst. Screener #4. +34% 20d = chase risk. Below 70 threshold. Monitor for pullback entry.</td>
+<td>—</td>
+<td><span class="muted" title="Outcome could not be fetched (delisted / symbol gone)">UNRESOLVABLE</span></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr data-type="REJECT" data-tier="ARCHIVE">
+<td>2026-07-06</td><td><span class="badge type-reject">REJECT</span></td><td><span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></td>
+<td><strong>SUPV</strong></td>
+<td class="stmt"><strong>REJECT (beyondCash / queued)</strong> — Argentina-Milei reflation cohort with BBAR/BMA/GGAL. Already extended; broker-mark RED brake blocks specs.</td>
+<td>—</td>
+<td><span class="muted" title="Outcome could not be fetched (delisted / symbol gone)">UNRESOLVABLE</span></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr data-type="FORECAST" data-tier="ARCHIVE">
+<td>2026-07-06</td><td><span class="badge type-forecast">FORECAST</span></td><td><span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></td>
+<td><strong>—</strong></td>
+<td class="stmt"><strong>FORECAST</strong></td>
+<td>—</td>
+<td><span class="muted">OPEN</span></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr data-type="CATALYST" data-tier="ARCHIVE">
+<td>2026-07-06</td><td><span class="badge type-catalyst">CATALYST</span></td><td><span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></td>
+<td><strong>RGTI</strong></td>
+<td class="stmt"><strong>THESIS_VALIDATION_GATE</strong> — Superconducting quantum (Rigetti). Q1 print 12-May was a beat; now +37% on cost ($18.63) → Major tier, requires named mechanism. Smaller/higher-beta than IONQ within the sleeve.</td>
+<td>$17.94</td>
+<td><span class="muted">OPEN</span></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr data-type="CATALYST" data-tier="ARCHIVE">
+<td>2026-07-06</td><td><span class="badge type-catalyst">CATALYST</span></td><td><span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></td>
+<td><strong>QUBT</strong></td>
+<td class="stmt"><strong>SKIP_LOCK</strong> — DO NOT BUY ÔÇö skipped from quantum sleeve</td>
+<td>—</td>
+<td><span class="muted" title="Outcome could not be fetched (delisted / symbol gone)">UNRESOLVABLE</span></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr data-type="CATALYST" data-tier="ARCHIVE">
+<td>2026-07-06</td><td><span class="badge type-catalyst">CATALYST</span></td><td><span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></td>
+<td><strong>PFE</strong></td>
+<td class="stmt"><strong>DEFENSIVE_CYCLE_GATE</strong> — Patent cliff Q4 2026 priced in; pipeline + GLP-1 oral candidate (danuglipron) + Seagen ADC platform offset post-cliff revenue. Dividend yield ~6% supports holding through cliff.</td>
+<td>$24.32</td>
+<td><span class="muted">OPEN</span></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr data-type="CATALYST" data-tier="ARCHIVE">
+<td>2026-07-06</td><td><span class="badge type-catalyst">CATALYST</span></td><td><span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></td>
+<td><strong>MU</strong></td>
+<td class="stmt"><strong>STRUCTURAL_FLOOR</strong> — HOLD [n] sh ÔÇö second mechanism alongside mu-nvda-print-thesis-validation. MU is the system's largest single-position breach (14.48% weight, +200% gain, single-position-cap binding). Critical-tier dual-coverage per .cursor/rules/thesis-validation-coverage.mdc.</td>
+<td>$975.56</td>
+<td><span class="muted">OPEN</span></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr data-type="CATALYST" data-tier="ARCHIVE">
+<td>2026-07-06</td><td><span class="badge type-catalyst">CATALYST</span></td><td><span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></td>
+<td><strong>MU</strong></td>
+<td class="stmt"><strong>REDEPLOY_PLAN</strong> — MU went parabolic (+54% in 10 sessions post-NVDA-print ~$700-&gt;$1,080, on +324% cost) and became the single dominant line at 25.6% of equities / 18.9% grand total. Mkt cap $1.22T vs analyst avg target ~$684 (-37%); binary Q3 FY26 print 24-Jun (guide: rev ~$33.5B, GM ~81%, EPS ~$1…</td>
+<td>$975.56</td>
+<td><span class="muted">OPEN</span></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr data-type="CATALYST" data-tier="ARCHIVE">
+<td>2026-07-06</td><td><span class="badge type-catalyst">CATALYST</span></td><td><span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></td>
+<td><strong>LUNR</strong></td>
+<td class="stmt"><strong>CYCLE_GATE</strong> — NASA CLPS (Commercial Lunar Payload Services) primary contractor with $719M cumulative awards through IM-4. Artemis-program-adjacent revenue stream; private lunar mission TAM expansion 2026-2030. Q1 2026 print showed margin discipline (gross margin -0.4% to +3.2% improving). Cat…</td>
+<td>$19.58</td>
+<td><span class="muted">OPEN</span></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr data-type="CATALYST" data-tier="ARCHIVE">
+<td>2026-07-06</td><td><span class="badge type-catalyst">CATALYST</span></td><td><span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></td>
+<td><strong>LLY</strong></td>
+<td class="stmt"><strong>DEFENSIVE_CYCLE_GATE</strong> — GLP-1 (Mounjaro/Zepbound) adoption still accelerating; manufacturing constraint relief 2026 unlocks volume; obesity TAM far from saturated.</td>
+<td>$1213.91</td>
+<td><span class="muted">OPEN</span></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr data-type="CATALYST" data-tier="ARCHIVE">
+<td>2026-07-06</td><td><span class="badge type-catalyst">CATALYST</span></td><td><span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></td>
+<td><strong>8058.T</strong></td>
+<td class="stmt"><strong>BUY_WATCH</strong> — Sogo shosha re-rating thesis (Buffett-validated): (a) Berkshire Hathaway ~$24B exposure across 5 trading houses (2024-25 disclosure), increased stake in 2024 against original 9.9% promise, (b) ROE 15%+ (Mitsubishi 13%, Itochu 17%, Mitsui 14%) at P/E 9-12x = quality compounder pr…</td>
+<td>—</td>
+<td><span class="muted" title="Outcome could not be fetched (delisted / symbol gone)">UNRESOLVABLE</span></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr data-type="CATALYST" data-tier="ARCHIVE">
+<td>2026-07-06</td><td><span class="badge type-catalyst">CATALYST</span></td><td><span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></td>
+<td><strong>7011.T</strong></td>
+<td class="stmt"><strong>BUY_WATCH</strong> — Japan defense secular cycle: (a) ¥43 trillion 5-year defense plan FY23-FY27 (Cabinet approved Dec-2022) = +60% real spending vs prior 5y baseline, (b) Pacifist Article 9 reinterpretation enabling offensive missile capability + foreign weapon exports (Dec-2023), (c) AUKUS+ integr…</td>
+<td>—</td>
+<td><span class="muted" title="Outcome could not be fetched (delisted / symbol gone)">UNRESOLVABLE</span></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr data-type="CATALYST" data-tier="ARCHIVE">
+<td>2026-07-06</td><td><span class="badge type-catalyst">CATALYST</span></td><td><span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></td>
+<td><strong>IONQ</strong></td>
+<td class="stmt"><strong>THESIS_VALIDATION_GATE</strong> — Trapped-ion quantum leader. Q1 rev $64.7M (+755% YoY), RPO $470M, DARPA HARQ + Air Force contracts. Now +61% on blended cost ($44.67) → Major tier, requires named mechanism per thesis-validation-coverage.</td>
+<td>$49.12</td>
+<td><span class="muted">OPEN</span></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr data-type="CATALYST" data-tier="ARCHIVE">
+<td>2026-07-06</td><td><span class="badge type-catalyst">CATALYST</span></td><td><span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></td>
+<td><strong>HUM</strong></td>
+<td class="stmt"><strong>DEFENSIVE_CYCLE_GATE</strong> — 2025 MA medical-cost shock + star-rating downgrade priced in. 2026 plan-year repricing (benefit trims, premium increases) + star-rating recovery path normalizes medical-loss ratio toward target. +32% rebound reflects early margin-recovery confirmation; thesis is multi-quarter ML…</td>
+<td>$396.75</td>
+<td><span class="muted">OPEN</span></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr data-type="REJECT" data-tier="ARCHIVE">
+<td>2026-07-06</td><td><span class="badge type-reject">REJECT</span></td><td><span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></td>
+<td><strong>HAE</strong></td>
+<td class="stmt"><strong>REJECT (beyondCash / queued)</strong> — Medical device breakout. Screener #2. But +50% in 20d = chase risk — non-IT, so cap-eligible, but wait for a 5-10% pullback rather than chase. Drawdown brake clear.</td>
+<td>—</td>
+<td><span class="muted" title="Outcome could not be fetched (delisted / symbol gone)">UNRESOLVABLE</span></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr data-type="CATALYST" data-tier="ARCHIVE">
+<td>2026-07-06</td><td><span class="badge type-catalyst">CATALYST</span></td><td><span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></td>
+<td><strong>FAC</strong></td>
+<td class="stmt"><strong>HOLD_LOCK</strong> — HOLD [n] sh Factorial Energy (received via CGCT de-SPAC merger 09-Jun). Pre-revenue solid-state EV battery moonshot, $1,600 / 0.85% weight. No add, no reflexive trim.</td>
+<td>$10.24</td>
+<td><span class="muted">OPEN</span></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr data-type="CATALYST" data-tier="ARCHIVE">
+<td>2026-07-06</td><td><span class="badge type-catalyst">CATALYST</span></td><td><span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></td>
+<td><strong>EOG</strong></td>
+<td class="stmt"><strong>DEFENSIVE_CYCLE_GATE</strong> — Premium-rock E&amp;P; lowest break-even in US shale (~$45 WTI); special dividends amplify yield; Eagle Ford + Delaware basin.</td>
+<td>$130.78</td>
+<td><span class="muted">OPEN</span></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr data-type="CATALYST" data-tier="ARCHIVE">
+<td>2026-07-06</td><td><span class="badge type-catalyst">CATALYST</span></td><td><span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></td>
+<td><strong>COP</strong></td>
+<td class="stmt"><strong>DEFENSIVE_CYCLE_GATE</strong> — US shale pure-play (Permian + Eagle Ford + Bakken); $20B+ buyback authorization; Marathon Oil acquisition synergies.</td>
+<td>$104.73</td>
+<td><span class="muted">OPEN</span></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr data-type="CATALYST" data-tier="ARCHIVE">
+<td>2026-07-06</td><td><span class="badge type-catalyst">CATALYST</span></td><td><span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></td>
+<td><strong>CECO</strong></td>
+<td class="stmt"><strong>HOLD_LOCK</strong> — HOLD — surf-origin BUY (Apr-30 $700) now +30% → crossed into Major-tier on gain. No standing stop per stop-only-on-real-risk (winner on healthy trend, no dated bearish signal). Thesis-trail.</td>
+<td>$82.15</td>
+<td><span class="muted">OPEN</span></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr data-type="REJECT" data-tier="ARCHIVE">
+<td>2026-07-06</td><td><span class="badge type-reject">REJECT</span></td><td><span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></td>
+<td><strong>CBRL</strong></td>
+<td class="stmt"><strong>REJECT (avoid)</strong> — Restaurant turnaround, 5d run-up = chase risk; await consolidation and Q3 print.</td>
+<td>$53.5</td>
+<td><span class="muted">OPEN</span></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr data-type="CATALYST" data-tier="ARCHIVE">
+<td>2026-07-06</td><td><span class="badge type-catalyst">CATALYST</span></td><td><span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></td>
+<td><strong>BTI</strong></td>
+<td class="stmt"><strong>HOLD_LOCK</strong> — HOLD [n] sh ÔÇö sistem rol├╝ AI cluster dengeleyici + dividend stream</td>
+<td>$61.77</td>
+<td><span class="muted">OPEN</span></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr data-type="REJECT" data-tier="ARCHIVE">
+<td>2026-07-06</td><td><span class="badge type-reject">REJECT</span></td><td><span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></td>
+<td><strong>BBAR</strong></td>
+<td class="stmt"><strong>REJECT (beyondCash / queued)</strong> — Argentina-Milei reflation cohort (BBAR/BMA/GGAL/SUPV). Structural EM-reflation thesis credible but already extended; lower priority than core holds. Monitor cohort; no chase into the FOMC binary.</td>
+<td>—</td>
+<td><span class="muted" title="Outcome could not be fetched (delisted / symbol gone)">UNRESOLVABLE</span></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr data-type="CATALYST" data-tier="ARCHIVE">
+<td>2026-07-06</td><td><span class="badge type-catalyst">CATALYST</span></td><td><span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></td>
+<td><strong>AVGO</strong></td>
+<td class="stmt"><strong>CYCLE_GATE</strong> — AI ASIC monopoly: Google TPU silicon manufacturer-of-record, Meta MTIA, ByteDance ASIC, multiple Tier-2 hyperscaler engagements. AI revenue run-rate $14-18B FY26 (vs $4B FY24 actual). Networking duopoly (with NVDA): switching silicon for AI fabrics. VMware integration cross-sell…</td>
+<td>$360.45</td>
+<td><span class="muted">OPEN</span></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr data-type="CATALYST" data-tier="ARCHIVE">
+<td>2026-07-06</td><td><span class="badge type-catalyst">CATALYST</span></td><td><span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></td>
+<td><strong>PDN.AX</strong></td>
+<td class="stmt"><strong>BUY_WATCH</strong> — Nuclear renaissance structural setup: (a) Trump Nuclear EOs May-2025 (4 executive orders accelerating SMR/AP1000/microreactor approval timelines), (b) hyperscaler PPA bonanza 2024-25 (Microsoft Three Mile Island restart, Amazon Talen-Susquehanna, Google Kairos SMR, Meta nuclear…</td>
+<td>—</td>
+<td><span class="muted" title="Outcome could not be fetched (delisted / symbol gone)">UNRESOLVABLE</span></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr data-type="REJECT" data-tier="ARCHIVE">
+<td>2026-07-06</td><td><span class="badge type-reject">REJECT</span></td><td><span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></td>
+<td><strong>ATEX</strong></td>
+<td class="stmt"><strong>REJECT (beyondCash / queued)</strong> — Private 5G enterprise mid-cap; structural thesis credible but post run-up. Broker-mark RED brake blocks specs; revisit on pullback or Q3 print.</td>
+<td>$105.14</td>
+<td><span class="muted">OPEN</span></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr data-type="CATALYST" data-tier="ARCHIVE">
+<td>2026-07-06</td><td><span class="badge type-catalyst">CATALYST</span></td><td><span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></td>
+<td><strong>AMD</strong></td>
+<td class="stmt"><strong>CYCLE_GATE</strong> — HOLD [n] sh ÔÇö thesis-trail (no standing stop). Next dated gate: AMD Q2 FY26 print ~Aug-26.</td>
+<td>$517.82</td>
+<td><span class="muted">OPEN</span></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr data-type="CATALYST" data-tier="ARCHIVE">
+<td>2026-07-06</td><td><span class="badge type-catalyst">CATALYST</span></td><td><span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></td>
+<td><strong>ALOY</strong></td>
+<td class="stmt"><strong>HOLD_LOCK</strong> — HOLD REalloys — rare-earth/magnet-metals moonshot, +64% on cost. No add, no reflexive trim; thesis-trail per thesis-horizon-constitution.</td>
+<td>$13.28</td>
+<td><span class="muted">OPEN</span></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr data-type="CATALYST" data-tier="ARCHIVE">
+<td>2026-07-03</td><td><span class="badge type-catalyst">CATALYST</span></td><td><span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></td>
+<td><strong>XOM</strong></td>
+<td class="stmt"><strong>DEFENSIVE_CYCLE_GATE</strong> — Permian + Guyana + LNG triple-engine; capital discipline returns &gt;$30B/yr to shareholders; Brent floor near $75 supports buybacks.</td>
+<td>$136.8</td>
+<td><span class="muted">OPEN</span></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr data-type="CATALYST" data-tier="ARCHIVE">
+<td>2026-07-03</td><td><span class="badge type-catalyst">CATALYST</span></td><td><span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></td>
+<td><strong>WOLF</strong></td>
+<td class="stmt"><strong>CRITICAL_TIER_FLOOR</strong> — HOLD [n] sh ÔÇö Critical-tier (gain +232%) requires named structural floor in addition to moonshot HEALTH_CHECK. NO standing stop today (cushion to thesis-collapse depth fails stop-only-on-real-risk Q3); manual review on named triggers.</td>
+<td>$49.65</td>
+<td><span class="muted">OPEN</span></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr data-type="REJECT" data-tier="ARCHIVE">
+<td>2026-07-03</td><td><span class="badge type-reject">REJECT</span></td><td><span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></td>
+<td><strong>WGS</strong></td>
+<td class="stmt"><strong>REJECT (beyondCash / queued)</strong> — Genomic diagnostics; healthcare rotation beneficiary. RED brake + Q3 print pending; not deployable today.</td>
+<td>—</td>
+<td><span class="muted" title="Outcome could not be fetched (delisted / symbol gone)">UNRESOLVABLE</span></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr data-type="CATALYST" data-tier="ARCHIVE">
+<td>2026-07-03</td><td><span class="badge type-catalyst">CATALYST</span></td><td><span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></td>
+<td><strong>UMC</strong></td>
+<td class="stmt"><strong>ADD_WATCH</strong> — HOLD ÔÇö winner emerging in surf bucket, graduated to Major-tier (gain +32%). Continue thesis-trail with surf -14% mechanical stop active. Re-evaluate at next Q earnings.</td>
+<td>$26.94</td>
+<td><span class="muted">OPEN</span></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr data-type="REJECT" data-tier="ARCHIVE">
+<td>2026-07-03</td><td><span class="badge type-reject">REJECT</span></td><td><span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></td>
+<td><strong>TWST</strong></td>
+<td class="stmt"><strong>REJECT (avoid / chase)</strong> — Synthetic-biology momentum on the healthcare rotation; chase risk on the run-up and below conviction for a fresh spec ahead of FOMC.</td>
+<td>$99.24</td>
+<td><span class="muted">OPEN</span></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr data-type="CATALYST" data-tier="ARCHIVE">
+<td>2026-07-03</td><td><span class="badge type-catalyst">CATALYST</span></td><td><span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></td>
+<td><strong>TTE</strong></td>
+<td class="stmt"><strong>DEFENSIVE_CYCLE_GATE</strong> — EU integrated supermajor; LNG + renewables transition pace; ~5% dividend yield; balance sheet supports through-cycle.</td>
+<td>$68.03</td>
+<td><span class="muted">OPEN</span></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr data-type="CATALYST" data-tier="ARCHIVE">
+<td>2026-07-03</td><td><span class="badge type-catalyst">CATALYST</span></td><td><span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></td>
+<td><strong>TSM</strong></td>
+<td class="stmt"><strong>ADD_WATCH</strong> — WATCH ONLY ÔÇö no order placed, AI-cluster cap blocks new BUYs</td>
+<td>$474.95</td>
+<td><span class="muted">OPEN</span></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr data-type="REJECT" data-tier="ARCHIVE">
+<td>2026-07-03</td><td><span class="badge type-reject">REJECT</span></td><td><span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></td>
+<td><strong>TNGX</strong></td>
+<td class="stmt"><strong>REJECT (beyondCash / queued)</strong> — Biotech catalyst. Screener #4. +34% 20d = chase risk. Below 70 threshold. Monitor for pullback entry.</td>
+<td>—</td>
+<td><span class="muted" title="Outcome could not be fetched (delisted / symbol gone)">UNRESOLVABLE</span></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr data-type="REJECT" data-tier="ARCHIVE">
+<td>2026-07-03</td><td><span class="badge type-reject">REJECT</span></td><td><span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></td>
+<td><strong>SUPV</strong></td>
+<td class="stmt"><strong>REJECT (beyondCash / queued)</strong> — Argentina-Milei reflation cohort with BBAR/BMA/GGAL. Already extended; broker-mark RED brake blocks specs.</td>
+<td>—</td>
+<td><span class="muted" title="Outcome could not be fetched (delisted / symbol gone)">UNRESOLVABLE</span></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr data-type="FORECAST" data-tier="ARCHIVE">
+<td>2026-07-03</td><td><span class="badge type-forecast">FORECAST</span></td><td><span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></td>
+<td><strong>—</strong></td>
+<td class="stmt"><strong>FORECAST</strong></td>
+<td>—</td>
+<td><span class="muted">OPEN</span></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr data-type="CATALYST" data-tier="ARCHIVE">
+<td>2026-07-03</td><td><span class="badge type-catalyst">CATALYST</span></td><td><span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></td>
+<td><strong>RGTI</strong></td>
+<td class="stmt"><strong>THESIS_VALIDATION_GATE</strong> — Superconducting quantum (Rigetti). Q1 print 12-May was a beat; now +37% on cost ($18.63) → Major tier, requires named mechanism. Smaller/higher-beta than IONQ within the sleeve.</td>
+<td>$19.13</td>
+<td><span class="muted">OPEN</span></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr data-type="CATALYST" data-tier="ARCHIVE">
+<td>2026-07-03</td><td><span class="badge type-catalyst">CATALYST</span></td><td><span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></td>
+<td><strong>QUBT</strong></td>
+<td class="stmt"><strong>SKIP_LOCK</strong> — DO NOT BUY ÔÇö skipped from quantum sleeve</td>
+<td>—</td>
+<td><span class="muted" title="Outcome could not be fetched (delisted / symbol gone)">UNRESOLVABLE</span></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr data-type="CATALYST" data-tier="ARCHIVE">
+<td>2026-07-03</td><td><span class="badge type-catalyst">CATALYST</span></td><td><span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></td>
+<td><strong>PFE</strong></td>
+<td class="stmt"><strong>DEFENSIVE_CYCLE_GATE</strong> — Patent cliff Q4 2026 priced in; pipeline + GLP-1 oral candidate (danuglipron) + Seagen ADC platform offset post-cliff revenue. Dividend yield ~6% supports holding through cliff.</td>
+<td>$24.12</td>
+<td><span class="muted">OPEN</span></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr data-type="CATALYST" data-tier="ARCHIVE">
+<td>2026-07-03</td><td><span class="badge type-catalyst">CATALYST</span></td><td><span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></td>
+<td><strong>MU</strong></td>
+<td class="stmt"><strong>STRUCTURAL_FLOOR</strong> — HOLD [n] sh ÔÇö second mechanism alongside mu-nvda-print-thesis-validation. MU is the system's largest single-position breach (14.48% weight, +200% gain, single-position-cap binding). Critical-tier dual-coverage per .cursor/rules/thesis-validation-coverage.mdc.</td>
+<td>$1159.58</td>
+<td><span class="muted">OPEN</span></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr data-type="CATALYST" data-tier="ARCHIVE">
+<td>2026-07-03</td><td><span class="badge type-catalyst">CATALYST</span></td><td><span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></td>
+<td><strong>MU</strong></td>
+<td class="stmt"><strong>REDEPLOY_PLAN</strong> — MU went parabolic (+54% in 10 sessions post-NVDA-print ~$700-&gt;$1,080, on +324% cost) and became the single dominant line at 25.6% of equities / 18.9% grand total. Mkt cap $1.22T vs analyst avg target ~$684 (-37%); binary Q3 FY26 print 24-Jun (guide: rev ~$33.5B, GM ~81%, EPS ~$1…</td>
+<td>$1159.58</td>
+<td><span class="muted">OPEN</span></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr data-type="CATALYST" data-tier="ARCHIVE">
+<td>2026-07-03</td><td><span class="badge type-catalyst">CATALYST</span></td><td><span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></td>
+<td><strong>LUNR</strong></td>
+<td class="stmt"><strong>CYCLE_GATE</strong> — NASA CLPS (Commercial Lunar Payload Services) primary contractor with $719M cumulative awards through IM-4. Artemis-program-adjacent revenue stream; private lunar mission TAM expansion 2026-2030. Q1 2026 print showed margin discipline (gross margin -0.4% to +3.2% improving). Cat…</td>
+<td>$21.26</td>
+<td><span class="muted">OPEN</span></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr data-type="CATALYST" data-tier="ARCHIVE">
+<td>2026-07-03</td><td><span class="badge type-catalyst">CATALYST</span></td><td><span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></td>
+<td><strong>LLY</strong></td>
+<td class="stmt"><strong>DEFENSIVE_CYCLE_GATE</strong> — GLP-1 (Mounjaro/Zepbound) adoption still accelerating; manufacturing constraint relief 2026 unlocks volume; obesity TAM far from saturated.</td>
+<td>$1211.46</td>
+<td><span class="muted">OPEN</span></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr data-type="CATALYST" data-tier="ARCHIVE">
+<td>2026-07-03</td><td><span class="badge type-catalyst">CATALYST</span></td><td><span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></td>
+<td><strong>8058.T</strong></td>
+<td class="stmt"><strong>BUY_WATCH</strong> — Sogo shosha re-rating thesis (Buffett-validated): (a) Berkshire Hathaway ~$24B exposure across 5 trading houses (2024-25 disclosure), increased stake in 2024 against original 9.9% promise, (b) ROE 15%+ (Mitsubishi 13%, Itochu 17%, Mitsui 14%) at P/E 9-12x = quality compounder pr…</td>
+<td>—</td>
+<td><span class="muted" title="Outcome could not be fetched (delisted / symbol gone)">UNRESOLVABLE</span></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr data-type="CATALYST" data-tier="ARCHIVE">
+<td>2026-07-03</td><td><span class="badge type-catalyst">CATALYST</span></td><td><span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></td>
+<td><strong>7011.T</strong></td>
+<td class="stmt"><strong>BUY_WATCH</strong> — Japan defense secular cycle: (a) ¥43 trillion 5-year defense plan FY23-FY27 (Cabinet approved Dec-2022) = +60% real spending vs prior 5y baseline, (b) Pacifist Article 9 reinterpretation enabling offensive missile capability + foreign weapon exports (Dec-2023), (c) AUKUS+ integr…</td>
+<td>—</td>
+<td><span class="muted" title="Outcome could not be fetched (delisted / symbol gone)">UNRESOLVABLE</span></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr data-type="CATALYST" data-tier="ARCHIVE">
+<td>2026-07-03</td><td><span class="badge type-catalyst">CATALYST</span></td><td><span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></td>
+<td><strong>IONQ</strong></td>
+<td class="stmt"><strong>THESIS_VALIDATION_GATE</strong> — Trapped-ion quantum leader. Q1 rev $64.7M (+755% YoY), RPO $470M, DARPA HARQ + Air Force contracts. Now +61% on blended cost ($44.67) → Major tier, requires named mechanism per thesis-validation-coverage.</td>
+<td>$52.75</td>
+<td><span class="muted">OPEN</span></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr data-type="CATALYST" data-tier="ARCHIVE">
+<td>2026-07-03</td><td><span class="badge type-catalyst">CATALYST</span></td><td><span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></td>
+<td><strong>HUM</strong></td>
+<td class="stmt"><strong>DEFENSIVE_CYCLE_GATE</strong> — 2025 MA medical-cost shock + star-rating downgrade priced in. 2026 plan-year repricing (benefit trims, premium increases) + star-rating recovery path normalizes medical-loss ratio toward target. +32% rebound reflects early margin-recovery confirmation; thesis is multi-quarter ML…</td>
+<td>$395.99</td>
+<td><span class="muted">OPEN</span></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr data-type="REJECT" data-tier="ARCHIVE">
+<td>2026-07-03</td><td><span class="badge type-reject">REJECT</span></td><td><span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></td>
+<td><strong>HAE</strong></td>
+<td class="stmt"><strong>REJECT (beyondCash / queued)</strong> — Medical device breakout. Screener #2. But +50% in 20d = chase risk — non-IT, so cap-eligible, but wait for a 5-10% pullback rather than chase. Drawdown brake clear.</td>
+<td>—</td>
+<td><span class="muted" title="Outcome could not be fetched (delisted / symbol gone)">UNRESOLVABLE</span></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr data-type="CATALYST" data-tier="ARCHIVE">
+<td>2026-07-03</td><td><span class="badge type-catalyst">CATALYST</span></td><td><span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></td>
+<td><strong>FAC</strong></td>
+<td class="stmt"><strong>HOLD_LOCK</strong> — HOLD [n] sh Factorial Energy (received via CGCT de-SPAC merger 09-Jun). Pre-revenue solid-state EV battery moonshot, $1,600 / 0.85% weight. No add, no reflexive trim.</td>
+<td>$10.11</td>
+<td><span class="muted">OPEN</span></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr data-type="CATALYST" data-tier="ARCHIVE">
+<td>2026-07-03</td><td><span class="badge type-catalyst">CATALYST</span></td><td><span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></td>
+<td><strong>EOG</strong></td>
+<td class="stmt"><strong>DEFENSIVE_CYCLE_GATE</strong> — Premium-rock E&amp;P; lowest break-even in US shale (~$45 WTI); special dividends amplify yield; Eagle Ford + Delaware basin.</td>
+<td>$130.46</td>
+<td><span class="muted">OPEN</span></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr data-type="CATALYST" data-tier="ARCHIVE">
+<td>2026-07-03</td><td><span class="badge type-catalyst">CATALYST</span></td><td><span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></td>
+<td><strong>COP</strong></td>
+<td class="stmt"><strong>DEFENSIVE_CYCLE_GATE</strong> — US shale pure-play (Permian + Eagle Ford + Bakken); $20B+ buyback authorization; Marathon Oil acquisition synergies.</td>
+<td>$104.35</td>
+<td><span class="muted">OPEN</span></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr data-type="CATALYST" data-tier="ARCHIVE">
+<td>2026-07-03</td><td><span class="badge type-catalyst">CATALYST</span></td><td><span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></td>
+<td><strong>CECO</strong></td>
+<td class="stmt"><strong>HOLD_LOCK</strong> — HOLD — surf-origin BUY (Apr-30 $700) now +30% → crossed into Major-tier on gain. No standing stop per stop-only-on-real-risk (winner on healthy trend, no dated bearish signal). Thesis-trail.</td>
+<td>$90.53</td>
+<td><span class="muted">OPEN</span></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr data-type="REJECT" data-tier="ARCHIVE">
+<td>2026-07-03</td><td><span class="badge type-reject">REJECT</span></td><td><span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></td>
+<td><strong>CBRL</strong></td>
+<td class="stmt"><strong>REJECT (avoid)</strong> — Restaurant turnaround, 5d run-up = chase risk; await consolidation and Q3 print.</td>
+<td>$53.5</td>
+<td><span class="muted">OPEN</span></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr data-type="CATALYST" data-tier="ARCHIVE">
+<td>2026-07-03</td><td><span class="badge type-catalyst">CATALYST</span></td><td><span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></td>
+<td><strong>BTI</strong></td>
+<td class="stmt"><strong>HOLD_LOCK</strong> — HOLD [n] sh ÔÇö sistem rol├╝ AI cluster dengeleyici + dividend stream</td>
+<td>$61.99</td>
+<td><span class="muted">OPEN</span></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr data-type="REJECT" data-tier="ARCHIVE">
+<td>2026-07-03</td><td><span class="badge type-reject">REJECT</span></td><td><span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></td>
+<td><strong>BBAR</strong></td>
+<td class="stmt"><strong>REJECT (beyondCash / queued)</strong> — Argentina-Milei reflation cohort (BBAR/BMA/GGAL/SUPV). Structural EM-reflation thesis credible but already extended; lower priority than core holds. Monitor cohort; no chase into the FOMC binary.</td>
+<td>—</td>
+<td><span class="muted" title="Outcome could not be fetched (delisted / symbol gone)">UNRESOLVABLE</span></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr data-type="CATALYST" data-tier="ARCHIVE">
+<td>2026-07-03</td><td><span class="badge type-catalyst">CATALYST</span></td><td><span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></td>
+<td><strong>AVGO</strong></td>
+<td class="stmt"><strong>CYCLE_GATE</strong> — AI ASIC monopoly: Google TPU silicon manufacturer-of-record, Meta MTIA, ByteDance ASIC, multiple Tier-2 hyperscaler engagements. AI revenue run-rate $14-18B FY26 (vs $4B FY24 actual). Networking duopoly (with NVDA): switching silicon for AI fabrics. VMware integration cross-sell…</td>
+<td>$378.37</td>
+<td><span class="muted">OPEN</span></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr data-type="CATALYST" data-tier="ARCHIVE">
+<td>2026-07-03</td><td><span class="badge type-catalyst">CATALYST</span></td><td><span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></td>
+<td><strong>PDN.AX</strong></td>
+<td class="stmt"><strong>BUY_WATCH</strong> — Nuclear renaissance structural setup: (a) Trump Nuclear EOs May-2025 (4 executive orders accelerating SMR/AP1000/microreactor approval timelines), (b) hyperscaler PPA bonanza 2024-25 (Microsoft Three Mile Island restart, Amazon Talen-Susquehanna, Google Kairos SMR, Meta nuclear…</td>
+<td>—</td>
+<td><span class="muted" title="Outcome could not be fetched (delisted / symbol gone)">UNRESOLVABLE</span></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr data-type="REJECT" data-tier="ARCHIVE">
+<td>2026-07-03</td><td><span class="badge type-reject">REJECT</span></td><td><span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></td>
+<td><strong>ATEX</strong></td>
+<td class="stmt"><strong>REJECT (beyondCash / queued)</strong> — Private 5G enterprise mid-cap; structural thesis credible but post run-up. Broker-mark RED brake blocks specs; revisit on pullback or Q3 print.</td>
+<td>$105.14</td>
+<td><span class="muted">OPEN</span></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr data-type="CATALYST" data-tier="ARCHIVE">
+<td>2026-07-03</td><td><span class="badge type-catalyst">CATALYST</span></td><td><span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></td>
+<td><strong>AMD</strong></td>
+<td class="stmt"><strong>CYCLE_GATE</strong> — HOLD [n] sh ÔÇö thesis-trail (no standing stop). Next dated gate: AMD Q2 FY26 print ~Aug-26.</td>
+<td>$581.01</td>
+<td><span class="muted">OPEN</span></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr data-type="CATALYST" data-tier="ARCHIVE">
+<td>2026-07-03</td><td><span class="badge type-catalyst">CATALYST</span></td><td><span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></td>
+<td><strong>ALOY</strong></td>
+<td class="stmt"><strong>HOLD_LOCK</strong> — HOLD REalloys — rare-earth/magnet-metals moonshot, +64% on cost. No add, no reflexive trim; thesis-trail per thesis-horizon-constitution.</td>
+<td>$14.31</td>
+<td><span class="muted">OPEN</span></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr data-type="CATALYST" data-tier="ARCHIVE">
+<td>2026-07-02</td><td><span class="badge type-catalyst">CATALYST</span></td><td><span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></td>
+<td><strong>XOM</strong></td>
+<td class="stmt"><strong>DEFENSIVE_CYCLE_GATE</strong> — Permian + Guyana + LNG triple-engine; capital discipline returns &gt;$30B/yr to shareholders; Brent floor near $75 supports buybacks.</td>
+<td>$136.8</td>
+<td><span class="muted">OPEN</span></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr data-type="CATALYST" data-tier="ARCHIVE">
+<td>2026-07-02</td><td><span class="badge type-catalyst">CATALYST</span></td><td><span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></td>
+<td><strong>WOLF</strong></td>
+<td class="stmt"><strong>CRITICAL_TIER_FLOOR</strong> — HOLD [n] sh ÔÇö Critical-tier (gain +232%) requires named structural floor in addition to moonshot HEALTH_CHECK. NO standing stop today (cushion to thesis-collapse depth fails stop-only-on-real-risk Q3); manual review on named triggers.</td>
+<td>$49.65</td>
+<td><span class="muted">OPEN</span></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr data-type="REJECT" data-tier="ARCHIVE">
+<td>2026-07-02</td><td><span class="badge type-reject">REJECT</span></td><td><span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></td>
+<td><strong>WGS</strong></td>
+<td class="stmt"><strong>REJECT (beyondCash / queued)</strong> — Genomic diagnostics; healthcare rotation beneficiary. RED brake + Q3 print pending; not deployable today.</td>
+<td>$71.71</td>
+<td><span class="muted">OPEN</span></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr data-type="CATALYST" data-tier="ARCHIVE">
+<td>2026-07-02</td><td><span class="badge type-catalyst">CATALYST</span></td><td><span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></td>
+<td><strong>UMC</strong></td>
+<td class="stmt"><strong>ADD_WATCH</strong> — HOLD ÔÇö winner emerging in surf bucket, graduated to Major-tier (gain +32%). Continue thesis-trail with surf -14% mechanical stop active. Re-evaluate at next Q earnings.</td>
+<td>$26.94</td>
+<td><span class="muted">OPEN</span></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr data-type="REJECT" data-tier="ARCHIVE">
+<td>2026-07-02</td><td><span class="badge type-reject">REJECT</span></td><td><span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></td>
+<td><strong>TWST</strong></td>
+<td class="stmt"><strong>REJECT (avoid / chase)</strong> — Synthetic-biology momentum on the healthcare rotation; chase risk on the run-up and below conviction for a fresh spec ahead of FOMC.</td>
+<td>$102.25</td>
+<td><span class="muted">OPEN</span></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr data-type="CATALYST" data-tier="ARCHIVE">
+<td>2026-07-02</td><td><span class="badge type-catalyst">CATALYST</span></td><td><span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></td>
+<td><strong>TTE</strong></td>
+<td class="stmt"><strong>DEFENSIVE_CYCLE_GATE</strong> — EU integrated supermajor; LNG + renewables transition pace; ~5% dividend yield; balance sheet supports through-cycle.</td>
+<td>$68.03</td>
+<td><span class="muted">OPEN</span></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr data-type="CATALYST" data-tier="ARCHIVE">
+<td>2026-07-02</td><td><span class="badge type-catalyst">CATALYST</span></td><td><span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></td>
+<td><strong>TSM</strong></td>
+<td class="stmt"><strong>ADD_WATCH</strong> — WATCH ONLY ÔÇö no order placed, AI-cluster cap blocks new BUYs</td>
+<td>$474.95</td>
+<td><span class="muted">OPEN</span></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr data-type="REJECT" data-tier="ARCHIVE">
+<td>2026-07-02</td><td><span class="badge type-reject">REJECT</span></td><td><span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></td>
+<td><strong>TNGX</strong></td>
+<td class="stmt"><strong>REJECT (beyondCash / queued)</strong> — Biotech catalyst. Screener #4. +34% 20d = chase risk. Below 70 threshold. Monitor for pullback entry.</td>
+<td>—</td>
+<td><span class="muted" title="Outcome could not be fetched (delisted / symbol gone)">UNRESOLVABLE</span></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr data-type="REJECT" data-tier="ARCHIVE">
+<td>2026-07-02</td><td><span class="badge type-reject">REJECT</span></td><td><span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></td>
+<td><strong>SUPV</strong></td>
+<td class="stmt"><strong>REJECT (beyondCash / queued)</strong> — Argentina-Milei reflation cohort with BBAR/BMA/GGAL. Already extended; broker-mark RED brake blocks specs.</td>
+<td>—</td>
+<td><span class="muted" title="Outcome could not be fetched (delisted / symbol gone)">UNRESOLVABLE</span></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr data-type="FORECAST" data-tier="ARCHIVE">
+<td>2026-07-02</td><td><span class="badge type-forecast">FORECAST</span></td><td><span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></td>
+<td><strong>—</strong></td>
+<td class="stmt"><strong>FORECAST</strong></td>
+<td>—</td>
+<td><span class="muted">OPEN</span></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr data-type="CATALYST" data-tier="ARCHIVE">
+<td>2026-07-02</td><td><span class="badge type-catalyst">CATALYST</span></td><td><span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></td>
+<td><strong>RGTI</strong></td>
+<td class="stmt"><strong>THESIS_VALIDATION_GATE</strong> — Superconducting quantum (Rigetti). Q1 print 12-May was a beat; now +37% on cost ($18.63) → Major tier, requires named mechanism. Smaller/higher-beta than IONQ within the sleeve.</td>
+<td>$19.13</td>
+<td><span class="muted">OPEN</span></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr data-type="CATALYST" data-tier="ARCHIVE">
+<td>2026-07-02</td><td><span class="badge type-catalyst">CATALYST</span></td><td><span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></td>
+<td><strong>QUBT</strong></td>
+<td class="stmt"><strong>SKIP_LOCK</strong> — DO NOT BUY ÔÇö skipped from quantum sleeve</td>
+<td>—</td>
+<td><span class="muted" title="Outcome could not be fetched (delisted / symbol gone)">UNRESOLVABLE</span></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr data-type="CATALYST" data-tier="ARCHIVE">
+<td>2026-07-02</td><td><span class="badge type-catalyst">CATALYST</span></td><td><span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></td>
+<td><strong>PFE</strong></td>
+<td class="stmt"><strong>DEFENSIVE_CYCLE_GATE</strong> — Patent cliff Q4 2026 priced in; pipeline + GLP-1 oral candidate (danuglipron) + Seagen ADC platform offset post-cliff revenue. Dividend yield ~6% supports holding through cliff.</td>
+<td>$24.12</td>
+<td><span class="muted">OPEN</span></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr data-type="CATALYST" data-tier="ARCHIVE">
+<td>2026-07-02</td><td><span class="badge type-catalyst">CATALYST</span></td><td><span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></td>
+<td><strong>MU</strong></td>
+<td class="stmt"><strong>STRUCTURAL_FLOOR</strong> — HOLD [n] sh ÔÇö second mechanism alongside mu-nvda-print-thesis-validation. MU is the system's largest single-position breach (14.48% weight, +200% gain, single-position-cap binding). Critical-tier dual-coverage per .cursor/rules/thesis-validation-coverage.mdc.</td>
+<td>$1159.58</td>
+<td><span class="muted">OPEN</span></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr data-type="CATALYST" data-tier="ARCHIVE">
+<td>2026-07-02</td><td><span class="badge type-catalyst">CATALYST</span></td><td><span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></td>
+<td><strong>MU</strong></td>
+<td class="stmt"><strong>REDEPLOY_PLAN</strong> — MU went parabolic (+54% in 10 sessions post-NVDA-print ~$700-&gt;$1,080, on +324% cost) and became the single dominant line at 25.6% of equities / 18.9% grand total. Mkt cap $1.22T vs analyst avg target ~$684 (-37%); binary Q3 FY26 print 24-Jun (guide: rev ~$33.5B, GM ~81%, EPS ~$1…</td>
+<td>$1159.58</td>
+<td><span class="muted">OPEN</span></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr data-type="CATALYST" data-tier="ARCHIVE">
+<td>2026-07-02</td><td><span class="badge type-catalyst">CATALYST</span></td><td><span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></td>
+<td><strong>LUNR</strong></td>
+<td class="stmt"><strong>CYCLE_GATE</strong> — NASA CLPS (Commercial Lunar Payload Services) primary contractor with $719M cumulative awards through IM-4. Artemis-program-adjacent revenue stream; private lunar mission TAM expansion 2026-2030. Q1 2026 print showed margin discipline (gross margin -0.4% to +3.2% improving). Cat…</td>
+<td>$21.26</td>
+<td><span class="muted">OPEN</span></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr data-type="CATALYST" data-tier="ARCHIVE">
+<td>2026-07-02</td><td><span class="badge type-catalyst">CATALYST</span></td><td><span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></td>
+<td><strong>LLY</strong></td>
+<td class="stmt"><strong>DEFENSIVE_CYCLE_GATE</strong> — GLP-1 (Mounjaro/Zepbound) adoption still accelerating; manufacturing constraint relief 2026 unlocks volume; obesity TAM far from saturated.</td>
+<td>$1211.46</td>
+<td><span class="muted">OPEN</span></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr data-type="CATALYST" data-tier="ARCHIVE">
+<td>2026-07-02</td><td><span class="badge type-catalyst">CATALYST</span></td><td><span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></td>
+<td><strong>8058.T</strong></td>
+<td class="stmt"><strong>BUY_WATCH</strong> — Sogo shosha re-rating thesis (Buffett-validated): (a) Berkshire Hathaway ~$24B exposure across 5 trading houses (2024-25 disclosure), increased stake in 2024 against original 9.9% promise, (b) ROE 15%+ (Mitsubishi 13%, Itochu 17%, Mitsui 14%) at P/E 9-12x = quality compounder pr…</td>
+<td>—</td>
+<td><span class="muted" title="Outcome could not be fetched (delisted / symbol gone)">UNRESOLVABLE</span></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr data-type="CATALYST" data-tier="ARCHIVE">
+<td>2026-07-02</td><td><span class="badge type-catalyst">CATALYST</span></td><td><span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></td>
+<td><strong>7011.T</strong></td>
+<td class="stmt"><strong>BUY_WATCH</strong> — Japan defense secular cycle: (a) ¥43 trillion 5-year defense plan FY23-FY27 (Cabinet approved Dec-2022) = +60% real spending vs prior 5y baseline, (b) Pacifist Article 9 reinterpretation enabling offensive missile capability + foreign weapon exports (Dec-2023), (c) AUKUS+ integr…</td>
+<td>—</td>
+<td><span class="muted" title="Outcome could not be fetched (delisted / symbol gone)">UNRESOLVABLE</span></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr data-type="CATALYST" data-tier="ARCHIVE">
+<td>2026-07-02</td><td><span class="badge type-catalyst">CATALYST</span></td><td><span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></td>
+<td><strong>IONQ</strong></td>
+<td class="stmt"><strong>THESIS_VALIDATION_GATE</strong> — Trapped-ion quantum leader. Q1 rev $64.7M (+755% YoY), RPO $470M, DARPA HARQ + Air Force contracts. Now +61% on blended cost ($44.67) → Major tier, requires named mechanism per thesis-validation-coverage.</td>
+<td>$52.75</td>
+<td><span class="muted">OPEN</span></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr data-type="CATALYST" data-tier="ARCHIVE">
+<td>2026-07-02</td><td><span class="badge type-catalyst">CATALYST</span></td><td><span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></td>
+<td><strong>HUM</strong></td>
+<td class="stmt"><strong>DEFENSIVE_CYCLE_GATE</strong> — 2025 MA medical-cost shock + star-rating downgrade priced in. 2026 plan-year repricing (benefit trims, premium increases) + star-rating recovery path normalizes medical-loss ratio toward target. +32% rebound reflects early margin-recovery confirmation; thesis is multi-quarter ML…</td>
+<td>$395.99</td>
+<td><span class="muted">OPEN</span></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr data-type="REJECT" data-tier="ARCHIVE">
+<td>2026-07-02</td><td><span class="badge type-reject">REJECT</span></td><td><span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></td>
+<td><strong>HAE</strong></td>
+<td class="stmt"><strong>REJECT (beyondCash / queued)</strong> — Medical device breakout. Screener #2. But +50% in 20d = chase risk — non-IT, so cap-eligible, but wait for a 5-10% pullback rather than chase. Drawdown brake clear.</td>
+<td>—</td>
+<td><span class="muted" title="Outcome could not be fetched (delisted / symbol gone)">UNRESOLVABLE</span></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr data-type="CATALYST" data-tier="ARCHIVE">
+<td>2026-07-02</td><td><span class="badge type-catalyst">CATALYST</span></td><td><span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></td>
+<td><strong>FAC</strong></td>
+<td class="stmt"><strong>HOLD_LOCK</strong> — HOLD [n] sh Factorial Energy (received via CGCT de-SPAC merger 09-Jun). Pre-revenue solid-state EV battery moonshot, $1,600 / 0.85% weight. No add, no reflexive trim.</td>
+<td>$10.11</td>
+<td><span class="muted">OPEN</span></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr data-type="CATALYST" data-tier="ARCHIVE">
+<td>2026-07-02</td><td><span class="badge type-catalyst">CATALYST</span></td><td><span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></td>
+<td><strong>EOG</strong></td>
+<td class="stmt"><strong>DEFENSIVE_CYCLE_GATE</strong> — Premium-rock E&amp;P; lowest break-even in US shale (~$45 WTI); special dividends amplify yield; Eagle Ford + Delaware basin.</td>
+<td>$130.46</td>
+<td><span class="muted">OPEN</span></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr data-type="CATALYST" data-tier="ARCHIVE">
+<td>2026-07-02</td><td><span class="badge type-catalyst">CATALYST</span></td><td><span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></td>
+<td><strong>COP</strong></td>
+<td class="stmt"><strong>DEFENSIVE_CYCLE_GATE</strong> — US shale pure-play (Permian + Eagle Ford + Bakken); $20B+ buyback authorization; Marathon Oil acquisition synergies.</td>
+<td>$104.35</td>
+<td><span class="muted">OPEN</span></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr data-type="CATALYST" data-tier="ARCHIVE">
+<td>2026-07-02</td><td><span class="badge type-catalyst">CATALYST</span></td><td><span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></td>
+<td><strong>CECO</strong></td>
+<td class="stmt"><strong>HOLD_LOCK</strong> — HOLD — surf-origin BUY (Apr-30 $700) now +30% → crossed into Major-tier on gain. No standing stop per stop-only-on-real-risk (winner on healthy trend, no dated bearish signal). Thesis-trail.</td>
+<td>$90.53</td>
+<td><span class="muted">OPEN</span></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr data-type="REJECT" data-tier="ARCHIVE">
+<td>2026-07-02</td><td><span class="badge type-reject">REJECT</span></td><td><span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></td>
+<td><strong>CBRL</strong></td>
+<td class="stmt"><strong>REJECT (avoid)</strong> — Restaurant turnaround, 5d run-up = chase risk; await consolidation and Q3 print.</td>
+<td>$55.1</td>
+<td><span class="muted">OPEN</span></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr data-type="CATALYST" data-tier="ARCHIVE">
+<td>2026-07-02</td><td><span class="badge type-catalyst">CATALYST</span></td><td><span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></td>
+<td><strong>BTI</strong></td>
+<td class="stmt"><strong>HOLD_LOCK</strong> — HOLD [n] sh ÔÇö sistem rol├╝ AI cluster dengeleyici + dividend stream</td>
+<td>$61.99</td>
+<td><span class="muted">OPEN</span></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr data-type="REJECT" data-tier="ARCHIVE">
+<td>2026-07-02</td><td><span class="badge type-reject">REJECT</span></td><td><span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></td>
+<td><strong>BBAR</strong></td>
+<td class="stmt"><strong>REJECT (beyondCash / queued)</strong> — Argentina-Milei reflation cohort (BBAR/BMA/GGAL/SUPV). Structural EM-reflation thesis credible but already extended; lower priority than core holds. Monitor cohort; no chase into the FOMC binary.</td>
+<td>—</td>
+<td><span class="muted" title="Outcome could not be fetched (delisted / symbol gone)">UNRESOLVABLE</span></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr data-type="CATALYST" data-tier="ARCHIVE">
+<td>2026-07-02</td><td><span class="badge type-catalyst">CATALYST</span></td><td><span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></td>
+<td><strong>AVGO</strong></td>
+<td class="stmt"><strong>CYCLE_GATE</strong> — AI ASIC monopoly: Google TPU silicon manufacturer-of-record, Meta MTIA, ByteDance ASIC, multiple Tier-2 hyperscaler engagements. AI revenue run-rate $14-18B FY26 (vs $4B FY24 actual). Networking duopoly (with NVDA): switching silicon for AI fabrics. VMware integration cross-sell…</td>
+<td>$378.37</td>
+<td><span class="muted">OPEN</span></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr data-type="CATALYST" data-tier="ARCHIVE">
+<td>2026-07-02</td><td><span class="badge type-catalyst">CATALYST</span></td><td><span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></td>
+<td><strong>PDN.AX</strong></td>
+<td class="stmt"><strong>BUY_WATCH</strong> — Nuclear renaissance structural setup: (a) Trump Nuclear EOs May-2025 (4 executive orders accelerating SMR/AP1000/microreactor approval timelines), (b) hyperscaler PPA bonanza 2024-25 (Microsoft Three Mile Island restart, Amazon Talen-Susquehanna, Google Kairos SMR, Meta nuclear…</td>
+<td>—</td>
+<td><span class="muted" title="Outcome could not be fetched (delisted / symbol gone)">UNRESOLVABLE</span></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr data-type="REJECT" data-tier="ARCHIVE">
+<td>2026-07-02</td><td><span class="badge type-reject">REJECT</span></td><td><span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></td>
+<td><strong>ATEX</strong></td>
+<td class="stmt"><strong>REJECT (beyondCash / queued)</strong> — Private 5G enterprise mid-cap; structural thesis credible but post run-up. Broker-mark RED brake blocks specs; revisit on pullback or Q3 print.</td>
+<td>$108.21</td>
+<td><span class="muted">OPEN</span></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr data-type="CATALYST" data-tier="ARCHIVE">
+<td>2026-07-02</td><td><span class="badge type-catalyst">CATALYST</span></td><td><span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></td>
+<td><strong>AMD</strong></td>
+<td class="stmt"><strong>CYCLE_GATE</strong> — HOLD [n] sh ÔÇö thesis-trail (no standing stop). Next dated gate: AMD Q2 FY26 print ~Aug-26.</td>
+<td>$581.01</td>
+<td><span class="muted">OPEN</span></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr data-type="CATALYST" data-tier="ARCHIVE">
+<td>2026-07-02</td><td><span class="badge type-catalyst">CATALYST</span></td><td><span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></td>
+<td><strong>ALOY</strong></td>
+<td class="stmt"><strong>HOLD_LOCK</strong> — HOLD REalloys — rare-earth/magnet-metals moonshot, +64% on cost. No add, no reflexive trim; thesis-trail per thesis-horizon-constitution.</td>
+<td>$14.31</td>
+<td><span class="muted">OPEN</span></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr data-type="CATALYST" data-tier="ARCHIVE">
+<td>2026-07-01</td><td><span class="badge type-catalyst">CATALYST</span></td><td><span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></td>
+<td><strong>XOM</strong></td>
+<td class="stmt"><strong>DEFENSIVE_CYCLE_GATE</strong> — Permian + Guyana + LNG triple-engine; capital discipline returns &gt;$30B/yr to shareholders; Brent floor near $75 supports buybacks.</td>
+<td>$136.8</td>
+<td><span class="muted">OPEN</span></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr data-type="CATALYST" data-tier="ARCHIVE">
+<td>2026-07-01</td><td><span class="badge type-catalyst">CATALYST</span></td><td><span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></td>
+<td><strong>WOLF</strong></td>
+<td class="stmt"><strong>CRITICAL_TIER_FLOOR</strong> — HOLD [n] sh ÔÇö Critical-tier (gain +232%) requires named structural floor in addition to moonshot HEALTH_CHECK. NO standing stop today (cushion to thesis-collapse depth fails stop-only-on-real-risk Q3); manual review on named triggers.</td>
+<td>$49.65</td>
+<td><span class="muted">OPEN</span></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr data-type="REJECT" data-tier="ARCHIVE">
+<td>2026-07-01</td><td><span class="badge type-reject">REJECT</span></td><td><span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></td>
+<td><strong>WGS</strong></td>
+<td class="stmt"><strong>REJECT (beyondCash / queued)</strong> — Genomic diagnostics; healthcare rotation beneficiary. RED brake + Q3 print pending; not deployable today.</td>
+<td>$68.65</td>
+<td><span class="muted">OPEN</span></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr data-type="CATALYST" data-tier="ARCHIVE">
+<td>2026-07-01</td><td><span class="badge type-catalyst">CATALYST</span></td><td><span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></td>
+<td><strong>UMC</strong></td>
+<td class="stmt"><strong>ADD_WATCH</strong> — HOLD ÔÇö winner emerging in surf bucket, graduated to Major-tier (gain +32%). Continue thesis-trail with surf -14% mechanical stop active. Re-evaluate at next Q earnings.</td>
+<td>$26.94</td>
+<td><span class="muted">OPEN</span></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr data-type="REJECT" data-tier="ARCHIVE">
+<td>2026-07-01</td><td><span class="badge type-reject">REJECT</span></td><td><span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></td>
+<td><strong>TWST</strong></td>
+<td class="stmt"><strong>REJECT (avoid / chase)</strong> — Synthetic-biology momentum on the healthcare rotation; chase risk on the run-up and below conviction for a fresh spec ahead of FOMC.</td>
+<td>$102.88</td>
+<td><span class="muted">OPEN</span></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr data-type="CATALYST" data-tier="ARCHIVE">
+<td>2026-07-01</td><td><span class="badge type-catalyst">CATALYST</span></td><td><span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></td>
+<td><strong>TTE</strong></td>
+<td class="stmt"><strong>DEFENSIVE_CYCLE_GATE</strong> — EU integrated supermajor; LNG + renewables transition pace; ~5% dividend yield; balance sheet supports through-cycle.</td>
+<td>$68.03</td>
+<td><span class="muted">OPEN</span></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr data-type="CATALYST" data-tier="ARCHIVE">
+<td>2026-07-01</td><td><span class="badge type-catalyst">CATALYST</span></td><td><span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></td>
+<td><strong>TSM</strong></td>
+<td class="stmt"><strong>ADD_WATCH</strong> — WATCH ONLY ÔÇö no order placed, AI-cluster cap blocks new BUYs</td>
+<td>$474.95</td>
+<td><span class="muted">OPEN</span></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr data-type="REJECT" data-tier="ARCHIVE">
+<td>2026-07-01</td><td><span class="badge type-reject">REJECT</span></td><td><span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></td>
+<td><strong>TNGX</strong></td>
+<td class="stmt"><strong>REJECT (beyondCash / queued)</strong> — Biotech catalyst. Screener #4. +34% 20d = chase risk. Below 70 threshold. Monitor for pullback entry.</td>
+<td>$31.26</td>
+<td><span class="muted">OPEN</span></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr data-type="REJECT" data-tier="ARCHIVE">
+<td>2026-07-01</td><td><span class="badge type-reject">REJECT</span></td><td><span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></td>
+<td><strong>SUPV</strong></td>
+<td class="stmt"><strong>REJECT (beyondCash / queued)</strong> — Argentina-Milei reflation cohort with BBAR/BMA/GGAL. Already extended; broker-mark RED brake blocks specs.</td>
+<td>—</td>
+<td><span class="muted" title="Outcome could not be fetched (delisted / symbol gone)">UNRESOLVABLE</span></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr data-type="FORECAST" data-tier="ARCHIVE">
+<td>2026-07-01</td><td><span class="badge type-forecast">FORECAST</span></td><td><span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></td>
+<td><strong>—</strong></td>
+<td class="stmt"><strong>FORECAST</strong></td>
+<td>—</td>
+<td><span class="muted">OPEN</span></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr data-type="CATALYST" data-tier="ARCHIVE">
+<td>2026-07-01</td><td><span class="badge type-catalyst">CATALYST</span></td><td><span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></td>
+<td><strong>RGTI</strong></td>
+<td class="stmt"><strong>THESIS_VALIDATION_GATE</strong> — Superconducting quantum (Rigetti). Q1 print 12-May was a beat; now +37% on cost ($18.63) → Major tier, requires named mechanism. Smaller/higher-beta than IONQ within the sleeve.</td>
+<td>$19.13</td>
+<td><span class="muted">OPEN</span></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr data-type="CATALYST" data-tier="ARCHIVE">
+<td>2026-07-01</td><td><span class="badge type-catalyst">CATALYST</span></td><td><span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></td>
+<td><strong>QUBT</strong></td>
+<td class="stmt"><strong>SKIP_LOCK</strong> — DO NOT BUY ÔÇö skipped from quantum sleeve</td>
+<td>—</td>
+<td><span class="muted" title="Outcome could not be fetched (delisted / symbol gone)">UNRESOLVABLE</span></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr data-type="CATALYST" data-tier="ARCHIVE">
+<td>2026-07-01</td><td><span class="badge type-catalyst">CATALYST</span></td><td><span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></td>
+<td><strong>PFE</strong></td>
+<td class="stmt"><strong>DEFENSIVE_CYCLE_GATE</strong> — Patent cliff Q4 2026 priced in; pipeline + GLP-1 oral candidate (danuglipron) + Seagen ADC platform offset post-cliff revenue. Dividend yield ~6% supports holding through cliff.</td>
+<td>$24.12</td>
+<td><span class="muted">OPEN</span></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr data-type="CATALYST" data-tier="ARCHIVE">
+<td>2026-07-01</td><td><span class="badge type-catalyst">CATALYST</span></td><td><span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></td>
+<td><strong>MU</strong></td>
+<td class="stmt"><strong>STRUCTURAL_FLOOR</strong> — HOLD [n] sh ÔÇö second mechanism alongside mu-nvda-print-thesis-validation. MU is the system's largest single-position breach (14.48% weight, +200% gain, single-position-cap binding). Critical-tier dual-coverage per .cursor/rules/thesis-validation-coverage.mdc.</td>
+<td>$1159.58</td>
+<td><span class="muted">OPEN</span></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr data-type="CATALYST" data-tier="ARCHIVE">
+<td>2026-07-01</td><td><span class="badge type-catalyst">CATALYST</span></td><td><span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></td>
+<td><strong>MU</strong></td>
+<td class="stmt"><strong>REDEPLOY_PLAN</strong> — MU went parabolic (+54% in 10 sessions post-NVDA-print ~$700-&gt;$1,080, on +324% cost) and became the single dominant line at 25.6% of equities / 18.9% grand total. Mkt cap $1.22T vs analyst avg target ~$684 (-37%); binary Q3 FY26 print 24-Jun (guide: rev ~$33.5B, GM ~81%, EPS ~$1…</td>
+<td>$1159.58</td>
+<td><span class="muted">OPEN</span></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr data-type="CATALYST" data-tier="ARCHIVE">
+<td>2026-07-01</td><td><span class="badge type-catalyst">CATALYST</span></td><td><span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></td>
+<td><strong>LUNR</strong></td>
+<td class="stmt"><strong>CYCLE_GATE</strong> — NASA CLPS (Commercial Lunar Payload Services) primary contractor with $719M cumulative awards through IM-4. Artemis-program-adjacent revenue stream; private lunar mission TAM expansion 2026-2030. Q1 2026 print showed margin discipline (gross margin -0.4% to +3.2% improving). Cat…</td>
+<td>$21.26</td>
+<td><span class="muted">OPEN</span></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr data-type="CATALYST" data-tier="ARCHIVE">
+<td>2026-07-01</td><td><span class="badge type-catalyst">CATALYST</span></td><td><span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></td>
+<td><strong>LLY</strong></td>
+<td class="stmt"><strong>DEFENSIVE_CYCLE_GATE</strong> — GLP-1 (Mounjaro/Zepbound) adoption still accelerating; manufacturing constraint relief 2026 unlocks volume; obesity TAM far from saturated.</td>
+<td>$1211.46</td>
+<td><span class="muted">OPEN</span></td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr data-type="CATALYST" data-tier="ARCHIVE">
+<td>2026-07-01</td><td><span class="badge type-catalyst">CATALYST</span></td><td><span class="badge archive" title="Backfilled from internal records after outcomes were knowable — honest history, weaker claim">ARCHIVE</span></td>
+<td><strong>8058.T</strong></td>
+<td class="stmt"><strong>BUY_WATCH</strong> — Sogo shosha re-rating thesis (Buffett-validated): (a) Berkshire Hathaway ~$24B exposure across 5 trading houses (2024-25 disclosure), increased stake in 2024 against original 9.9% promise, (b) ROE 15%+ (Mitsubishi 13%, Itochu 17%, Mitsui 14%) at P/E 9-12x = quality compounder pr…</td>
+<td>—</td>
+<td><span class="muted" title="Outcome could not be fetched (delisted / symbol gone)">UNRESOLVABLE</span></td>
+<td>—</td>
+<td>—</td>
+</tr>
+</tbody></table>
+
+<h2>Integrity</h2>
+<div class="card">
+<p class="small">Chain: <strong>1</strong> block(s). Every block hashes the full record set plus the previous block; every record carries an immutable <code>claimHash</code> over its claim fields. Re-run verification any time — a single edited claim breaks the chain.</p>
+<p class="integrity">head block #0 · 2026-07-08<br>recordsHash f37d46a82e6e470a6bb1eae85db98457c6230524a51ac66a5d53e72bda7f3483<br>blockHash 5c614fa302fa2686897e14ebc172f622feeec21d28bfd016329989735e6051d8</p>
+<p class="small muted">Raw artifacts: <a href="ledger.json">ledger.json</a> · <a href="chain.jsonl">chain.jsonl</a></p>
+</div>
+
+<footer style="margin-top:2.5rem;color:var(--muted);font-size:.75rem">
+Generated 2026-07-08T22:09:09.796Z · This page documents a private system's decision record. It is not investment advice; no statement here is a recommendation to buy or sell any security.
+</footer>
+</div>
+<script>
+document.getElementById('filters').addEventListener('click',function(e){
+  var b=e.target.closest('button');if(!b)return;
+  document.querySelectorAll('#filters button').forEach(function(x){x.classList.remove('active')});
+  b.classList.add('active');var f=b.dataset.f;
+  document.querySelectorAll('#ledger tbody tr').forEach(function(tr){
+    var show = f==='ALL' || tr.dataset.type===f || (f==='LIVE'&&tr.dataset.tier==='LIVE');
+    tr.style.display=show?'':'none';
+  });
+});
+</script>
+</body></html>
