@@ -1,6 +1,6 @@
 {
  "$schema": "Singularity verified decision ledger. Append-only. Claim fields are immutable after publication (claimHash); outcome fields are filled mechanically by the resolver. Integrity: chain.jsonl hash chain + git history.",
- "generatedAt": "2026-07-09T08:00:28.668Z",
+ "generatedAt": "2026-07-09T08:40:46.621Z",
  "records": [
   {
    "id": "2026-02-02-MU-EXIT",
@@ -22827,30 +22827,6 @@
    "publishedAt": "2026-07-08"
   },
   {
-   "id": "2026-06-04-FC-297bfae9de",
-   "type": "FORECAST",
-   "decidedAt": "2026-06-04",
-   "ticker": "NO",
-   "action": "FORECAST (qualitative)",
-   "statement": "No new equity BUY/ADD/TRIM proposed Tue 2-Jun → Wed 3-Jun pre-AVGO (AI-Semi chase territory, sector caps binding, Rule 58 blackout).",
-   "refPrice": null,
-   "probability": 0.7,
-   "resolveBy": "2026-06-03",
-   "status": "OPEN",
-   "outcome": {
-    "resolvedAt": null,
-    "result": null,
-    "fwd5": null,
-    "fwd20": null,
-    "fwd30": null,
-    "brier": null,
-    "realizedPnlPct": null
-   },
-   "claimHash": "1fbb3fa18db4cd0f9b8c492679a4c87cf545add3945a6e9680ec7f91ce7e48d2",
-   "tier": "ARCHIVE",
-   "publishedAt": "2026-07-08"
-  },
-  {
    "id": "2026-06-04-FC-3becb55d1d",
    "type": "FORECAST",
    "decidedAt": "2026-06-04",
@@ -22871,30 +22847,6 @@
     "realizedPnlPct": null
    },
    "claimHash": "9016bc8852832374cf65de006526fd89ab8eab26ad0430c98b05a9ebe3610c02",
-   "tier": "ARCHIVE",
-   "publishedAt": "2026-07-08"
-  },
-  {
-   "id": "2026-06-04-FC-a7a7405d0b",
-   "type": "FORECAST",
-   "decidedAt": "2026-06-04",
-   "ticker": "MU",
-   "action": "FORECAST (range)",
-   "statement": "MU closes Tue 2-Jun between $930-1,010 (post-$1T-cap melt-up holds; no fresh profit-lock catalyst, AI-Semi cluster compounding).",
-   "refPrice": null,
-   "probability": 0.55,
-   "resolveBy": "2026-06-02",
-   "status": "RESOLVED",
-   "outcome": {
-    "resolvedAt": "2026-06-04",
-    "result": "MISS",
-    "fwd5": null,
-    "fwd20": null,
-    "fwd30": null,
-    "brier": 0.3025,
-    "realizedPnlPct": null
-   },
-   "claimHash": "e3ed9106aaf009ef3e4ef55f7f545bb8586c8d016c0b080ddc59ff87b8f60138",
    "tier": "ARCHIVE",
    "publishedAt": "2026-07-08"
   },
@@ -29283,30 +29235,6 @@
    "publishedAt": "2026-07-08"
   },
   {
-   "id": "2026-06-29-RHM-REJ",
-   "type": "REJECT",
-   "decidedAt": "2026-06-29",
-   "ticker": "RHM",
-   "action": "REJECT (scored-not-bought / scored)",
-   "statement": "",
-   "refPrice": null,
-   "probability": null,
-   "resolveBy": "2026-07-29",
-   "status": "UNRESOLVABLE",
-   "outcome": {
-    "resolvedAt": null,
-    "result": null,
-    "fwd5": null,
-    "fwd20": null,
-    "fwd30": null,
-    "brier": null,
-    "realizedPnlPct": null
-   },
-   "claimHash": "ce463ad33cfd4b5303babba1920a4a4e941a7c87042609927088f61ece3ef1d7",
-   "tier": "ARCHIVE",
-   "publishedAt": "2026-07-08"
-  },
-  {
    "id": "2026-06-29-SCSET",
    "type": "FORECAST",
    "decidedAt": "2026-06-29",
@@ -30147,30 +30075,6 @@
    "publishedAt": "2026-07-08"
   },
   {
-   "id": "2026-07-01-mu-concentration-trim-and-dry-powder-redeploy-CAT",
-   "type": "CATALYST",
-   "decidedAt": "2026-07-01",
-   "ticker": "MU",
-   "action": "REDEPLOY_PLAN",
-   "statement": "MU went parabolic (+54% in 10 sessions post-NVDA-print ~$700->$1,080, on +324% cost) and became the single dominant line at 25.6% of equities / 18.9% grand total. Mkt cap $1.22T vs analyst avg target ~$684 (-37%); binary Q3 FY26 print 24-Jun (guide: rev ~$33.5B, GM ~81%, EPS ~$1…",
-   "refPrice": 1159.58,
-   "probability": null,
-   "resolveBy": "2026-07-21",
-   "status": "OPEN",
-   "outcome": {
-    "resolvedAt": null,
-    "result": null,
-    "fwd5": -15.08,
-    "fwd20": null,
-    "fwd30": null,
-    "brier": null,
-    "realizedPnlPct": null
-   },
-   "claimHash": "cd48795e100ca743b51071be238a1e5d41aea603b9e74e02f0a81ac0159b835a",
-   "tier": "ARCHIVE",
-   "publishedAt": "2026-07-08"
-  },
-  {
    "id": "2026-07-01-mu-structural-floor-CAT",
    "type": "CATALYST",
    "decidedAt": "2026-07-01",
@@ -30959,30 +30863,6 @@
     "realizedPnlPct": null
    },
    "claimHash": "b0e2a4a721dac4df2e721a363a1c15f815195b3167ad810fa452b2a522b21c4a",
-   "tier": "ARCHIVE",
-   "publishedAt": "2026-07-08"
-  },
-  {
-   "id": "2026-07-02-mu-concentration-trim-and-dry-powder-redeploy-CAT",
-   "type": "CATALYST",
-   "decidedAt": "2026-07-02",
-   "ticker": "MU",
-   "action": "REDEPLOY_PLAN",
-   "statement": "MU went parabolic (+54% in 10 sessions post-NVDA-print ~$700->$1,080, on +324% cost) and became the single dominant line at 25.6% of equities / 18.9% grand total. Mkt cap $1.22T vs analyst avg target ~$684 (-37%); binary Q3 FY26 print 24-Jun (guide: rev ~$33.5B, GM ~81%, EPS ~$1…",
-   "refPrice": 1159.58,
-   "probability": null,
-   "resolveBy": "2026-07-22",
-   "status": "OPEN",
-   "outcome": {
-    "resolvedAt": null,
-    "result": null,
-    "fwd5": null,
-    "fwd20": null,
-    "fwd30": null,
-    "brier": null,
-    "realizedPnlPct": null
-   },
-   "claimHash": "312ad09a3717154ed79f35677aa158092af6e4819fb3aff06208ffee2d4296b0",
    "tier": "ARCHIVE",
    "publishedAt": "2026-07-08"
   },
@@ -31779,30 +31659,6 @@
    "publishedAt": "2026-07-08"
   },
   {
-   "id": "2026-07-03-mu-concentration-trim-and-dry-powder-redeploy-CAT",
-   "type": "CATALYST",
-   "decidedAt": "2026-07-03",
-   "ticker": "MU",
-   "action": "REDEPLOY_PLAN",
-   "statement": "MU went parabolic (+54% in 10 sessions post-NVDA-print ~$700->$1,080, on +324% cost) and became the single dominant line at 25.6% of equities / 18.9% grand total. Mkt cap $1.22T vs analyst avg target ~$684 (-37%); binary Q3 FY26 print 24-Jun (guide: rev ~$33.5B, GM ~81%, EPS ~$1…",
-   "refPrice": 1159.58,
-   "probability": null,
-   "resolveBy": "2026-07-23",
-   "status": "OPEN",
-   "outcome": {
-    "resolvedAt": null,
-    "result": null,
-    "fwd5": null,
-    "fwd20": null,
-    "fwd30": null,
-    "brier": null,
-    "realizedPnlPct": null
-   },
-   "claimHash": "1643ea0e9e4b3c0da9ae68526fefd9ca73061f08639b1656cc85137a98908be0",
-   "tier": "ARCHIVE",
-   "publishedAt": "2026-07-08"
-  },
-  {
    "id": "2026-07-03-mu-structural-floor-CAT",
    "type": "CATALYST",
    "decidedAt": "2026-07-03",
@@ -32595,30 +32451,6 @@
    "publishedAt": "2026-07-08"
   },
   {
-   "id": "2026-07-06-mu-concentration-trim-and-dry-powder-redeploy-CAT",
-   "type": "CATALYST",
-   "decidedAt": "2026-07-06",
-   "ticker": "MU",
-   "action": "REDEPLOY_PLAN",
-   "statement": "MU went parabolic (+54% in 10 sessions post-NVDA-print ~$700->$1,080, on +324% cost) and became the single dominant line at 25.6% of equities / 18.9% grand total. Mkt cap $1.22T vs analyst avg target ~$684 (-37%); binary Q3 FY26 print 24-Jun (guide: rev ~$33.5B, GM ~81%, EPS ~$1…",
-   "refPrice": 975.56,
-   "probability": null,
-   "resolveBy": "2026-07-26",
-   "status": "OPEN",
-   "outcome": {
-    "resolvedAt": null,
-    "result": null,
-    "fwd5": null,
-    "fwd20": null,
-    "fwd30": null,
-    "brier": null,
-    "realizedPnlPct": null
-   },
-   "claimHash": "b101b3a803d67dc3454a84df6785deaa3dd3a651fc109bb945e0d58ff72e3595",
-   "tier": "ARCHIVE",
-   "publishedAt": "2026-07-08"
-  },
-  {
    "id": "2026-07-06-mu-structural-floor-CAT",
    "type": "CATALYST",
    "decidedAt": "2026-07-06",
@@ -33383,30 +33215,6 @@
     "realizedPnlPct": null
    },
    "claimHash": "0d313277ac9e9c89e90c18ae7da6e93947e1abc4a2468cf1a5f8ff72e680d144",
-   "tier": "ARCHIVE",
-   "publishedAt": "2026-07-08"
-  },
-  {
-   "id": "2026-07-07-mu-concentration-trim-and-dry-powder-redeploy-CAT",
-   "type": "CATALYST",
-   "decidedAt": "2026-07-07",
-   "ticker": "MU",
-   "action": "REDEPLOY_PLAN",
-   "statement": "MU went parabolic (+54% in 10 sessions post-NVDA-print ~$700->$1,080, on +324% cost) and became the single dominant line at 25.6% of equities / 18.9% grand total. Mkt cap $1.22T vs analyst avg target ~$684 (-37%); binary Q3 FY26 print 24-Jun (guide: rev ~$33.5B, GM ~81%, EPS ~$1…",
-   "refPrice": 975.56,
-   "probability": null,
-   "resolveBy": "2026-07-27",
-   "status": "OPEN",
-   "outcome": {
-    "resolvedAt": null,
-    "result": null,
-    "fwd5": null,
-    "fwd20": null,
-    "fwd30": null,
-    "brier": null,
-    "realizedPnlPct": null
-   },
-   "claimHash": "66e24a36ad1a49d8a24f91e718d5a917a0ed895776183dfc128d030448212857",
    "tier": "ARCHIVE",
    "publishedAt": "2026-07-08"
   },
@@ -34275,30 +34083,6 @@
    "publishedAt": "2026-07-08"
   },
   {
-   "id": "2026-07-08-lunr-nasa-contract-watch-CAT",
-   "type": "CATALYST",
-   "decidedAt": "2026-07-08",
-   "ticker": "LUNR",
-   "action": "CYCLE_GATE",
-   "statement": "NASA CLPS (Commercial Lunar Payload Services) primary contractor with $719M cumulative awards through IM-4. Artemis-program-adjacent revenue stream; private lunar mission TAM expansion 2026-2030. Q1 2026 print showed margin discipline (gross margin -0.4% to +3.2% improving). Cat…",
-   "refPrice": 19.58,
-   "probability": null,
-   "resolveBy": "2026-07-28",
-   "status": "OPEN",
-   "outcome": {
-    "resolvedAt": null,
-    "result": null,
-    "fwd5": null,
-    "fwd20": null,
-    "fwd30": null,
-    "brier": null,
-    "realizedPnlPct": null
-   },
-   "claimHash": "85b419ca602f397582a881bc685d1cdcff3eac6755a1ae1709f2c2a65dac8ad1",
-   "tier": "ARCHIVE",
-   "publishedAt": "2026-07-08"
-  },
-  {
    "id": "2026-07-08-LUNR-TRIM-ACTION-8",
    "type": "ACTION",
    "decidedAt": "2026-07-08",
@@ -34391,30 +34175,6 @@
     "realizedPnlPct": null
    },
    "claimHash": "b355ea0749023b628fe76a31373efa12977922a401196f7634b823b843f0c333",
-   "tier": "ARCHIVE",
-   "publishedAt": "2026-07-08"
-  },
-  {
-   "id": "2026-07-08-mu-concentration-trim-and-dry-powder-redeploy-CAT",
-   "type": "CATALYST",
-   "decidedAt": "2026-07-08",
-   "ticker": "MU",
-   "action": "REDEPLOY_PLAN",
-   "statement": "MU went parabolic (+54% in 10 sessions post-NVDA-print ~$700->$1,080, on +324% cost) and became the single dominant line at 25.6% of equities / 18.9% grand total. Mkt cap $1.22T vs analyst avg target ~$684 (-37%); binary Q3 FY26 print 24-Jun (guide: rev ~$33.5B, GM ~81%, EPS ~$1…",
-   "refPrice": 975.56,
-   "probability": null,
-   "resolveBy": "2026-07-28",
-   "status": "OPEN",
-   "outcome": {
-    "resolvedAt": null,
-    "result": null,
-    "fwd5": null,
-    "fwd20": null,
-    "fwd30": null,
-    "brier": null,
-    "realizedPnlPct": null
-   },
-   "claimHash": "f728e882349da41d47a9e9c12912f50ecf957cc883679b843c1dccbde8de4e44",
    "tier": "ARCHIVE",
    "publishedAt": "2026-07-08"
   },
@@ -34799,30 +34559,6 @@
     "realizedPnlPct": null
    },
    "claimHash": "320a4b7b3ce5383ed76e4df8704b2c9527a13a4abd9fa7dff29d4e466fe296ce",
-   "tier": "ARCHIVE",
-   "publishedAt": "2026-07-08"
-  },
-  {
-   "id": "2026-07-08-wolf-structural-floor-CAT",
-   "type": "CATALYST",
-   "decidedAt": "2026-07-08",
-   "ticker": "WOLF",
-   "action": "CRITICAL_TIER_FLOOR",
-   "statement": "HOLD [n] sh ÔÇö Critical-tier (gain +232%) requires named structural floor in addition to moonshot HEALTH_CHECK. NO standing stop today (cushion to thesis-collapse depth fails stop-only-on-real-risk Q3); manual review on named triggers.",
-   "refPrice": 40,
-   "probability": null,
-   "resolveBy": "2026-07-28",
-   "status": "OPEN",
-   "outcome": {
-    "resolvedAt": null,
-    "result": null,
-    "fwd5": null,
-    "fwd20": null,
-    "fwd30": null,
-    "brier": null,
-    "realizedPnlPct": null
-   },
-   "claimHash": "c4cc99cf44304df1d1248734225c1e9d043b8b6ec49678a39f2e66bd2f939dce",
    "tier": "ARCHIVE",
    "publishedAt": "2026-07-08"
   },
