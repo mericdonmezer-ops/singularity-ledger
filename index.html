@@ -103,15 +103,7 @@ code{font-family:var(--mono);font-size:.85em;background:var(--surface2);padding:
 
 /* —— filters + data table —— */
 .toolcard{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);box-shadow:0 1px 3px rgba(15,23,42,.05)}
-.filter-toolbar{border-bottom:1px solid var(--border);background:var(--surface2)}
-.filter-toolbar-head{display:flex;align-items:center;gap:.75rem;padding:.65rem 1rem;flex-wrap:wrap}
-.filter-expand-btn{display:inline-flex;align-items:center;gap:.35rem;background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text);font:inherit;font-size:.82rem;font-weight:600;padding:.45rem .75rem;cursor:pointer}
-.filter-expand-btn:hover{border-color:var(--accent);color:var(--accent)}
-.filter-expand-btn[aria-expanded=true]{border-color:var(--accent);background:var(--accent-dim)}
-.filter-expand-icon{font-size:.75rem;color:var(--muted);width:.75rem}
-.filter-active-summary{font-size:.78rem;color:var(--muted);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.toolcard-filters{display:grid;grid-template-columns:repeat(3,minmax(140px,1fr));gap:.6rem;padding:1rem;border-top:1px solid var(--border);background:var(--surface)}
-.toolcard-filters[hidden]{display:none !important}
+.toolcard-filters{display:grid;grid-template-columns:repeat(3,minmax(140px,1fr));gap:.6rem;padding:1rem;border-bottom:1px solid var(--border);background:var(--surface2)}
 .field label,.field .field-label{display:block;font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:.25rem}
 .field input[type=date]{width:100%;background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:.5rem .65rem;font:inherit;font-size:.84rem}
 .field input[type=date]:focus{outline:none;border-color:var(--accent)}
@@ -369,14 +361,7 @@ footer{margin-top:3rem;padding-top:1.5rem;border-top:1px solid var(--border);fon
     <p>2026-07-08 — screened universe → focus set → verdict per ticker. Multi-select filters; empty = all. <a href="daily-board.json">daily-board.json</a></p>
   </div>
   <div class="toolcard">
-    <div class="filter-toolbar">
-    <div class="filter-toolbar-head">
-      <button type="button" class="filter-expand-btn" data-filter-target="board-filters" aria-expanded="false">
-        <span class="filter-expand-icon" aria-hidden="true">▸</span> Filters
-      </button>
-      <span class="filter-active-summary" id="board-filters-summary">All rows</span>
-    </div>
-    <div class="toolcard-filters" id="board-filters" hidden><div class="field mf" data-mf="bticker">
+    <div class="toolcard-filters"><div class="field mf" data-mf="bticker">
     <span class="field-label">Ticker</span>
     <button type="button" class="mf-trigger" aria-haspopup="listbox" aria-expanded="false">
       <span class="mf-label">All</span><span class="mf-caret" aria-hidden="true">▾</span>
@@ -442,7 +427,6 @@ footer{margin-top:3rem;padding-top:1.5rem;border-top:1px solid var(--border);fon
     </div>
   </div>
       <div class="field"><span class="field-label" for="bdate">Date</span><input id="bdate" type="date" value="2026-07-08"></div></div>
-  </div>
     <div class="toolcard-meta"><span id="boardCount">—</span><span id="boardVisible">30</span> shown</div>
     <div class="table-wrap">
       <table class="data-table" id="boardTable">
@@ -589,14 +573,7 @@ footer{margin-top:3rem;padding-top:1.5rem;border-top:1px solid var(--border);fon
     <p>Latest 200 of 1,453 tracked receipts. Multi-select filters; empty = all. <a href="ledger.json">ledger.json</a></p>
   </div>
   <div class="toolcard">
-    <div class="filter-toolbar">
-    <div class="filter-toolbar-head">
-      <button type="button" class="filter-expand-btn" data-filter-target="ledger-filters" aria-expanded="false">
-        <span class="filter-expand-icon" aria-hidden="true">▸</span> Filters
-      </button>
-      <span class="filter-active-summary" id="ledger-filters-summary">All rows</span>
-    </div>
-    <div class="toolcard-filters" id="ledger-filters" hidden><div class="field mf" data-mf="lticker">
+    <div class="toolcard-filters"><div class="field mf" data-mf="lticker">
     <span class="field-label">Ticker</span>
     <button type="button" class="mf-trigger" aria-haspopup="listbox" aria-expanded="false">
       <span class="mf-label">All</span><span class="mf-caret" aria-hidden="true">▾</span>
@@ -637,7 +614,6 @@ footer{margin-top:3rem;padding-top:1.5rem;border-top:1px solid var(--border);fon
   </div>
       <div class="field"><span class="field-label" for="from">From</span><input id="from" type="date"></div>
       <div class="field"><span class="field-label" for="to">To</span><input id="to" type="date"></div></div>
-  </div>
     <div class="toolcard-meta"><span id="resultCount">—</span><span id="visibleCount">25</span> shown</div>
     <div class="table-wrap">
       <table class="data-table">
@@ -744,49 +720,6 @@ function mfUpdateLabel(wrap){
     trigger.classList.add('active');
   }
 }
-function mfSummaryPart(id, name){
-  var sel = mfSelected(id);
-  if(!sel.length) return null;
-  var text = sel.length <= 2 ? sel.join(', ') : sel.length + ' picked';
-  return name + ': ' + text;
-}
-function updateBoardFilterSummary(){
-  var el = document.getElementById('board-filters-summary');
-  if(!el) return;
-  var parts = [
-    mfSummaryPart('bticker','Ticker'),
-    mfSummaryPart('bsector','Sector'),
-    mfSummaryPart('bverdict','Verdict'),
-    mfSummaryPart('bauth','Authority'),
-    mfSummaryPart('bheld','Held')
-  ].filter(Boolean);
-  if(boardEls.date && boardEls.date.value) parts.push('Date: ' + boardEls.date.value);
-  el.textContent = parts.length ? parts.join(' · ') : 'All rows';
-}
-function updateLedgerFilterSummary(){
-  var el = document.getElementById('ledger-filters-summary');
-  if(!el) return;
-  var parts = [
-    mfSummaryPart('lticker','Ticker'),
-    mfSummaryPart('ltype','Type'),
-    mfSummaryPart('lstatus','Status')
-  ].filter(Boolean);
-  if(els.from && els.from.value) parts.push('From ' + els.from.value);
-  if(els.to && els.to.value) parts.push('To ' + els.to.value);
-  el.textContent = parts.length ? parts.join(' · ') : 'All rows';
-}
-function initFilterToolbars(){
-  document.querySelectorAll('.filter-expand-btn').forEach(function(btn){
-    btn.addEventListener('click', function(){
-      var target = document.getElementById(btn.getAttribute('data-filter-target'));
-      if(!target) return;
-      var willOpen = target.hidden;
-      target.hidden = !willOpen;
-      btn.setAttribute('aria-expanded', willOpen ? 'true' : 'false');
-      btn.querySelector('.filter-expand-icon').textContent = willOpen ? '▾' : '▸';
-    });
-  });
-}
 function initMultiFilters(){
   document.querySelectorAll('.mf').forEach(function(wrap){
     var trigger = wrap.querySelector('.mf-trigger');
@@ -795,8 +728,8 @@ function initMultiFilters(){
     function apply(){
       mfUpdateLabel(wrap);
       var id = wrap.getAttribute('data-mf') || '';
-      if(id.charAt(0) === 'b'){ refreshBoard(); updateBoardFilterSummary(); }
-      else { refreshLedger(); updateLedgerFilterSummary(); }
+      if(id.charAt(0) === 'b') refreshBoard();
+      else refreshLedger();
     }
     trigger.addEventListener('click', function(e){
       e.stopPropagation();
@@ -818,8 +751,8 @@ function initMultiFilters(){
       var selectAll = btn.getAttribute('data-mf-action') === 'all';
       boxes.forEach(function(b){ b.checked = selectAll; });
       mfUpdateLabel(wrap);
-      if(id && id.charAt(0) === 'b'){ refreshBoard(); updateBoardFilterSummary(); }
-      else { refreshLedger(); updateLedgerFilterSummary(); }
+      if(id && id.charAt(0) === 'b') refreshBoard();
+      else refreshLedger();
     });
   });
   document.addEventListener('click', function(){
@@ -925,9 +858,8 @@ function renderExplorer(reset){
   }
 }
 
-function refreshBoard(){ renderBoard(true); updateBoardFilterSummary(); }
-function refreshLedger(){ renderExplorer(true); updateLedgerFilterSummary(); }
-initFilterToolbars();
+function refreshBoard(){ renderBoard(true); }
+function refreshLedger(){ renderExplorer(true); }
 initMultiFilters();
 if(boardEls.date) boardEls.date.addEventListener('change', refreshBoard);
 ['from','to'].forEach(function(k){ if(els[k]) els[k].addEventListener('change', refreshLedger); });
