@@ -103,10 +103,27 @@ code{font-family:var(--mono);font-size:.85em;background:var(--surface2);padding:
 
 /* —— filters + data table —— */
 .toolcard{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;box-shadow:0 1px 3px rgba(15,23,42,.05)}
-.toolcard-filters{display:grid;grid-template-columns:1.4fr repeat(4,minmax(100px,1fr));gap:.6rem;padding:1rem;border-bottom:1px solid var(--border);background:var(--surface2)}
-.field label{display:block;font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:.25rem}
-.field input,.field select{width:100%;background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:.5rem .65rem;font:inherit;font-size:.84rem}
-.field input:focus,.field select:focus{outline:none;border-color:var(--accent)}
+.toolcard-filters{display:grid;grid-template-columns:repeat(3,minmax(140px,1fr));gap:.6rem;padding:1rem;border-bottom:1px solid var(--border);background:var(--surface2)}
+.field label,.field .field-label{display:block;font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:.25rem}
+.field input[type=date]{width:100%;background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:.5rem .65rem;font:inherit;font-size:.84rem}
+.field input[type=date]:focus{outline:none;border-color:var(--accent)}
+
+/* —— multi-select filters —— */
+.mf{position:relative}
+.mf-trigger{width:100%;display:flex;align-items:center;justify-content:space-between;gap:.5rem;background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:.5rem .65rem;font:inherit;font-size:.84rem;cursor:pointer;text-align:left}
+.mf-trigger:hover{border-color:var(--border2)}
+.mf-trigger:focus{outline:none;border-color:var(--accent)}
+.mf-label{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1}
+.mf-caret{color:var(--muted);font-size:.7rem}
+.mf-panel{position:absolute;top:calc(100% + 4px);left:0;right:0;z-index:50;background:var(--surface);border:1px solid var(--border);border-radius:8px;box-shadow:0 8px 24px rgba(15,23,42,.12);max-height:240px;display:flex;flex-direction:column}
+.mf-actions{display:flex;gap:.35rem;padding:.4rem .5rem;border-bottom:1px solid var(--border);background:var(--surface2)}
+.mf-action{background:none;border:none;color:var(--accent);font:inherit;font-size:.72rem;font-weight:600;cursor:pointer;padding:.2rem .35rem;border-radius:4px}
+.mf-action:hover{background:var(--accent-dim)}
+.mf-opts{overflow-y:auto;padding:.35rem 0}
+.mf-opt{display:flex;align-items:center;gap:.45rem;padding:.35rem .65rem;font-size:.82rem;cursor:pointer}
+.mf-opt:hover{background:rgba(15,23,42,.04)}
+.mf-opt input{margin:0;accent-color:var(--accent)}
+.mf-opt span{overflow:hidden;text-overflow:ellipsis}
 .toolcard-meta{display:flex;justify-content:space-between;align-items:center;padding:.65rem 1rem;font-size:.78rem;color:var(--muted);border-bottom:1px solid var(--border)}
 .table-wrap{overflow-x:auto;max-height:min(70vh,640px);overflow-y:auto}
 .data-table{width:100%;border-collapse:collapse;font-size:.8rem}
@@ -337,15 +354,76 @@ footer{margin-top:3rem;padding-top:1.5rem;border-top:1px solid var(--border);fon
 <section class="panel" id="panel-board">
   <div class="section-head">
     <h2>Daily Focus Board</h2>
-    <p>2026-07-08 — screened universe → focus set → verdict per ticker. Filter by stock, verdict, authority. <a href="daily-board.json">daily-board.json</a></p>
+    <p>2026-07-08 — screened universe → focus set → verdict per ticker. Multi-select filters; empty = all. <a href="daily-board.json">daily-board.json</a></p>
   </div>
   <div class="toolcard">
     <div class="toolcard-filters">
-      <div class="field"><label for="bq">Search</label><input id="bq" type="search" placeholder="Ticker, sector, EV…" autocomplete="off"></div>
-      <div class="field"><label for="bverdict">Verdict</label><select id="bverdict"><option value="ALL">All</option><option>BUY</option><option>SELL</option><option>TRIM</option><option>HOLD</option><option>WATCH</option><option>NO ACTION</option><option>TRACKED</option></select></div>
-      <div class="field"><label for="bauth">Authority</label><select id="bauth"><option value="ALL">All</option><option value="ACTIVE">Active</option><option value="ARMING">Arming</option><option value="RESEARCH_ONLY">Research</option></select></div>
-      <div class="field"><label for="bheld">Held</label><select id="bheld"><option value="ALL">All</option><option value="true">Held</option><option value="false">Not held</option></select></div>
-      <div class="field"><label for="bdate">Date</label><input id="bdate" type="date" value="2026-07-08"></div>
+      <div class="field mf" data-mf="bticker">
+    <span class="field-label">Ticker</span>
+    <button type="button" class="mf-trigger" aria-haspopup="listbox" aria-expanded="false">
+      <span class="mf-label">All</span><span class="mf-caret" aria-hidden="true">▾</span>
+    </button>
+    <div class="mf-panel" hidden>
+      <div class="mf-actions">
+        <button type="button" class="mf-action" data-mf-action="clear" data-mf="bticker">Clear</button>
+        <button type="button" class="mf-action" data-mf-action="all" data-mf="bticker">All</button>
+      </div>
+      <div class="mf-opts"><label class="mf-opt"><input type="checkbox" value="ABSI"> <span>ABSI</span></label><label class="mf-opt"><input type="checkbox" value="ABVX"> <span>ABVX</span></label><label class="mf-opt"><input type="checkbox" value="ABX"> <span>ABX</span></label><label class="mf-opt"><input type="checkbox" value="ACHR"> <span>ACHR</span></label><label class="mf-opt"><input type="checkbox" value="ACIW"> <span>ACIW</span></label><label class="mf-opt"><input type="checkbox" value="ACVA"> <span>ACVA</span></label><label class="mf-opt"><input type="checkbox" value="AGIO"> <span>AGIO</span></label><label class="mf-opt"><input type="checkbox" value="ALHC"> <span>ALHC</span></label><label class="mf-opt"><input type="checkbox" value="ALMS"> <span>ALMS</span></label><label class="mf-opt"><input type="checkbox" value="ALOY"> <span>ALOY</span></label><label class="mf-opt"><input type="checkbox" value="AMAT"> <span>AMAT</span></label><label class="mf-opt"><input type="checkbox" value="AMD"> <span>AMD</span></label><label class="mf-opt"><input type="checkbox" value="ANAB"> <span>ANAB</span></label><label class="mf-opt"><input type="checkbox" value="APGE"> <span>APGE</span></label><label class="mf-opt"><input type="checkbox" value="APPS"> <span>APPS</span></label><label class="mf-opt"><input type="checkbox" value="ARM"> <span>ARM</span></label><label class="mf-opt"><input type="checkbox" value="ARQT"> <span>ARQT</span></label><label class="mf-opt"><input type="checkbox" value="ASML"> <span>ASML</span></label><label class="mf-opt"><input type="checkbox" value="ASTI"> <span>ASTI</span></label><label class="mf-opt"><input type="checkbox" value="ATEX"> <span>ATEX</span></label><label class="mf-opt"><input type="checkbox" value="AVAH"> <span>AVAH</span></label><label class="mf-opt"><input type="checkbox" value="AVGO"> <span>AVGO</span></label><label class="mf-opt"><input type="checkbox" value="AVO"> <span>AVO</span></label><label class="mf-opt"><input type="checkbox" value="AVTX"> <span>AVTX</span></label><label class="mf-opt"><input type="checkbox" value="AXON"> <span>AXON</span></label><label class="mf-opt"><input type="checkbox" value="BA.L"> <span>BA.L</span></label><label class="mf-opt"><input type="checkbox" value="BATL"> <span>BATL</span></label><label class="mf-opt"><input type="checkbox" value="BAYN.DE"> <span>BAYN.DE</span></label><label class="mf-opt"><input type="checkbox" value="BBAR"> <span>BBAR</span></label><label class="mf-opt"><input type="checkbox" value="BCAX"> <span>BCAX</span></label><label class="mf-opt"><input type="checkbox" value="BCRX"> <span>BCRX</span></label><label class="mf-opt"><input type="checkbox" value="BEAM"> <span>BEAM</span></label><label class="mf-opt"><input type="checkbox" value="BEN"> <span>BEN</span></label><label class="mf-opt"><input type="checkbox" value="BFLY"> <span>BFLY</span></label><label class="mf-opt"><input type="checkbox" value="BHVN"> <span>BHVN</span></label><label class="mf-opt"><input type="checkbox" value="BJRI"> <span>BJRI</span></label><label class="mf-opt"><input type="checkbox" value="BOBS"> <span>BOBS</span></label><label class="mf-opt"><input type="checkbox" value="BRBR"> <span>BRBR</span></label><label class="mf-opt"><input type="checkbox" value="BTI"> <span>BTI</span></label><label class="mf-opt"><input type="checkbox" value="BULL"> <span>BULL</span></label><label class="mf-opt"><input type="checkbox" value="BWIN"> <span>BWIN</span></label><label class="mf-opt"><input type="checkbox" value="CARG"> <span>CARG</span></label><label class="mf-opt"><input type="checkbox" value="CBRL"> <span>CBRL</span></label><label class="mf-opt"><input type="checkbox" value="CDNL"> <span>CDNL</span></label><label class="mf-opt"><input type="checkbox" value="CECO"> <span>CECO</span></label><label class="mf-opt"><input type="checkbox" value="CELC"> <span>CELC</span></label><label class="mf-opt"><input type="checkbox" value="CERT"> <span>CERT</span></label><label class="mf-opt"><input type="checkbox" value="CGEM"> <span>CGEM</span></label><label class="mf-opt"><input type="checkbox" value="CLDX"> <span>CLDX</span></label><label class="mf-opt"><input type="checkbox" value="COGT"> <span>COGT</span></label><label class="mf-opt"><input type="checkbox" value="COHR"> <span>COHR</span></label><label class="mf-opt"><input type="checkbox" value="COMP"> <span>COMP</span></label><label class="mf-opt"><input type="checkbox" value="COP"> <span>COP</span></label><label class="mf-opt"><input type="checkbox" value="CORT"> <span>CORT</span></label><label class="mf-opt"><input type="checkbox" value="CRDO"> <span>CRDO</span></label><label class="mf-opt"><input type="checkbox" value="CRNX"> <span>CRNX</span></label><label class="mf-opt"><input type="checkbox" value="CRTO"> <span>CRTO</span></label><label class="mf-opt"><input type="checkbox" value="CRVS"> <span>CRVS</span></label><label class="mf-opt"><input type="checkbox" value="CVLT"> <span>CVLT</span></label><label class="mf-opt"><input type="checkbox" value="CXT"> <span>CXT</span></label><label class="mf-opt"><input type="checkbox" value="CXW"> <span>CXW</span></label><label class="mf-opt"><input type="checkbox" value="CYH"> <span>CYH</span></label><label class="mf-opt"><input type="checkbox" value="DAVE"> <span>DAVE</span></label><label class="mf-opt"><input type="checkbox" value="DLO"> <span>DLO</span></label><label class="mf-opt"><input type="checkbox" value="DMRA"> <span>DMRA</span></label><label class="mf-opt"><input type="checkbox" value="DNLI"> <span>DNLI</span></label><label class="mf-opt"><input type="checkbox" value="DYN"> <span>DYN</span></label><label class="mf-opt"><input type="checkbox" value="ELF"> <span>ELF</span></label><label class="mf-opt"><input type="checkbox" value="ELVN"> <span>ELVN</span></label><label class="mf-opt"><input type="checkbox" value="ENVA"> <span>ENVA</span></label><label class="mf-opt"><input type="checkbox" value="EOG"> <span>EOG</span></label><label class="mf-opt"><input type="checkbox" value="ERAS"> <span>ERAS</span></label><label class="mf-opt"><input type="checkbox" value="EVER"> <span>EVER</span></label><label class="mf-opt"><input type="checkbox" value="FAC"> <span>FAC</span></label><label class="mf-opt"><input type="checkbox" value="FBRX"> <span>FBRX</span></label><label class="mf-opt"><input type="checkbox" value="FDMT"> <span>FDMT</span></label><label class="mf-opt"><input type="checkbox" value="FOUR"> <span>FOUR</span></label><label class="mf-opt"><input type="checkbox" value="GEO"> <span>GEO</span></label><label class="mf-opt"><input type="checkbox" value="GEV"> <span>GEV</span></label><label class="mf-opt"><input type="checkbox" value="GLUE"> <span>GLUE</span></label><label class="mf-opt"><input type="checkbox" value="GOLD"> <span>GOLD</span></label><label class="mf-opt"><input type="checkbox" value="GPC"> <span>GPC</span></label><label class="mf-opt"><input type="checkbox" value="GPCR"> <span>GPCR</span></label><label class="mf-opt"><input type="checkbox" value="GPGI"> <span>GPGI</span></label><label class="mf-opt"><input type="checkbox" value="GRND"> <span>GRND</span></label><label class="mf-opt"><input type="checkbox" value="GRPN"> <span>GRPN</span></label><label class="mf-opt"><input type="checkbox" value="GSHD"> <span>GSHD</span></label><label class="mf-opt"><input type="checkbox" value="HAE"> <span>HAE</span></label><label class="mf-opt"><input type="checkbox" value="HEI"> <span>HEI</span></label><label class="mf-opt"><input type="checkbox" value="HIMS"> <span>HIMS</span></label><label class="mf-opt"><input type="checkbox" value="HNGE"> <span>HNGE</span></label><label class="mf-opt"><input type="checkbox" value="HOOD"> <span>HOOD</span></label><label class="mf-opt"><input type="checkbox" value="HPE"> <span>HPE</span></label><label class="mf-opt"><input type="checkbox" value="HPP"> <span>HPP</span></label><label class="mf-opt"><input type="checkbox" value="HROW"> <span>HROW</span></label><label class="mf-opt"><input type="checkbox" value="HUM"> <span>HUM</span></label><label class="mf-opt"><input type="checkbox" value="ICHR"> <span>ICHR</span></label><label class="mf-opt"><input type="checkbox" value="IDYA"> <span>IDYA</span></label><label class="mf-opt"><input type="checkbox" value="IMMX"> <span>IMMX</span></label><label class="mf-opt"><input type="checkbox" value="IMNM"> <span>IMNM</span></label><label class="mf-opt"><input type="checkbox" value="IMVT"> <span>IMVT</span></label><label class="mf-opt"><input type="checkbox" value="IONQ"> <span>IONQ</span></label><label class="mf-opt"><input type="checkbox" value="IPAR"> <span>IPAR</span></label><label class="mf-opt"><input type="checkbox" value="IRWD"> <span>IRWD</span></label><label class="mf-opt"><input type="checkbox" value="KLAC"> <span>KLAC</span></label><label class="mf-opt"><input type="checkbox" value="KMTS"> <span>KMTS</span></label><label class="mf-opt"><input type="checkbox" value="KNSA"> <span>KNSA</span></label><label class="mf-opt"><input type="checkbox" value="KOID"> <span>KOID</span></label><label class="mf-opt"><input type="checkbox" value="KTB"> <span>KTB</span></label><label class="mf-opt"><input type="checkbox" value="KURA"> <span>KURA</span></label><label class="mf-opt"><input type="checkbox" value="KYMR"> <span>KYMR</span></label><label class="mf-opt"><input type="checkbox" value="KYTX"> <span>KYTX</span></label><label class="mf-opt"><input type="checkbox" value="LAES"> <span>LAES</span></label><label class="mf-opt"><input type="checkbox" value="LFST"> <span>LFST</span></label><label class="mf-opt"><input type="checkbox" value="LGND"> <span>LGND</span></label><label class="mf-opt"><input type="checkbox" value="LLY"> <span>LLY</span></label><label class="mf-opt"><input type="checkbox" value="LMND"> <span>LMND</span></label><label class="mf-opt"><input type="checkbox" value="LMRI"> <span>LMRI</span></label><label class="mf-opt"><input type="checkbox" value="LQDA"> <span>LQDA</span></label><label class="mf-opt"><input type="checkbox" value="LUNR"> <span>LUNR</span></label><label class="mf-opt"><input type="checkbox" value="LZ"> <span>LZ</span></label><label class="mf-opt"><input type="checkbox" value="MAMA"> <span>MAMA</span></label><label class="mf-opt"><input type="checkbox" value="MAX"> <span>MAX</span></label><label class="mf-opt"><input type="checkbox" value="MAZE"> <span>MAZE</span></label><label class="mf-opt"><input type="checkbox" value="MBX"> <span>MBX</span></label><label class="mf-opt"><input type="checkbox" value="MEG"> <span>MEG</span></label><label class="mf-opt"><input type="checkbox" value="MGNI"> <span>MGNI</span></label><label class="mf-opt"><input type="checkbox" value="MIDD"> <span>MIDD</span></label><label class="mf-opt"><input type="checkbox" value="MIRM"> <span>MIRM</span></label><label class="mf-opt"><input type="checkbox" value="MLKN"> <span>MLKN</span></label><label class="mf-opt"><input type="checkbox" value="MMYT"> <span>MMYT</span></label><label class="mf-opt"><input type="checkbox" value="MNPR"> <span>MNPR</span></label><label class="mf-opt"><input type="checkbox" value="MNTS"> <span>MNTS</span></label><label class="mf-opt"><input type="checkbox" value="MP"> <span>MP</span></label><label class="mf-opt"><input type="checkbox" value="MRNA"> <span>MRNA</span></label><label class="mf-opt"><input type="checkbox" value="MRVL"> <span>MRVL</span></label><label class="mf-opt"><input type="checkbox" value="MU"> <span>MU</span></label><label class="mf-opt"><input type="checkbox" value="NAVN"> <span>NAVN</span></label><label class="mf-opt"><input type="checkbox" value="NEO"> <span>NEO</span></label><label class="mf-opt"><input type="checkbox" value="NIQ"> <span>NIQ</span></label><label class="mf-opt"><input type="checkbox" value="NKTR"> <span>NKTR</span></label><label class="mf-opt"><input type="checkbox" value="NNE"> <span>NNE</span></label><label class="mf-opt"><input type="checkbox" value="NP"> <span>NP</span></label><label class="mf-opt"><input type="checkbox" value="NPT"> <span>NPT</span></label><label class="mf-opt"><input type="checkbox" value="NRIX"> <span>NRIX</span></label><label class="mf-opt"><input type="checkbox" value="NTLA"> <span>NTLA</span></label><label class="mf-opt"><input type="checkbox" value="NTRA"> <span>NTRA</span></label><label class="mf-opt"><input type="checkbox" value="NUTX"> <span>NUTX</span></label><label class="mf-opt"><input type="checkbox" value="NUVL"> <span>NUVL</span></label><label class="mf-opt"><input type="checkbox" value="NWL"> <span>NWL</span></label><label class="mf-opt"><input type="checkbox" value="ODD"> <span>ODD</span></label><label class="mf-opt"><input type="checkbox" value="OFRM"> <span>OFRM</span></label><label class="mf-opt"><input type="checkbox" value="OMDA"> <span>OMDA</span></label><label class="mf-opt"><input type="checkbox" value="ORIC"> <span>ORIC</span></label><label class="mf-opt"><input type="checkbox" value="ORKA"> <span>ORKA</span></label><label class="mf-opt"><input type="checkbox" value="PAR"> <span>PAR</span></label><label class="mf-opt"><input type="checkbox" value="PAY"> <span>PAY</span></label><label class="mf-opt"><input type="checkbox" value="PAYO"> <span>PAYO</span></label><label class="mf-opt"><input type="checkbox" value="PFE"> <span>PFE</span></label><label class="mf-opt"><input type="checkbox" value="PLMR"> <span>PLMR</span></label><label class="mf-opt"><input type="checkbox" value="PRCH"> <span>PRCH</span></label><label class="mf-opt"><input type="checkbox" value="PRME"> <span>PRME</span></label><label class="mf-opt"><input type="checkbox" value="PTGX"> <span>PTGX</span></label><label class="mf-opt"><input type="checkbox" value="PTRN"> <span>PTRN</span></label><label class="mf-opt"><input type="checkbox" value="QCOM"> <span>QCOM</span></label><label class="mf-opt"><input type="checkbox" value="QLYS"> <span>QLYS</span></label><label class="mf-opt"><input type="checkbox" value="QNST"> <span>QNST</span></label><label class="mf-opt"><input type="checkbox" value="QURE"> <span>QURE</span></label><label class="mf-opt"><input type="checkbox" value="RARE"> <span>RARE</span></label><label class="mf-opt"><input type="checkbox" value="RBLX"> <span>RBLX</span></label><label class="mf-opt"><input type="checkbox" value="RCKT"> <span>RCKT</span></label><label class="mf-opt"><input type="checkbox" value="RDVT"> <span>RDVT</span></label><label class="mf-opt"><input type="checkbox" value="RGNX"> <span>RGNX</span></label><label class="mf-opt"><input type="checkbox" value="RGTI"> <span>RGTI</span></label><label class="mf-opt"><input type="checkbox" value="RIGL"> <span>RIGL</span></label><label class="mf-opt"><input type="checkbox" value="RL"> <span>RL</span></label><label class="mf-opt"><input type="checkbox" value="RLAY"> <span>RLAY</span></label><label class="mf-opt"><input type="checkbox" value="RMIX"> <span>RMIX</span></label><label class="mf-opt"><input type="checkbox" value="ROG"> <span>ROG</span></label><label class="mf-opt"><input type="checkbox" value="RPD"> <span>RPD</span></label><label class="mf-opt"><input type="checkbox" value="RXRX"> <span>RXRX</span></label><label class="mf-opt"><input type="checkbox" value="RYTM"> <span>RYTM</span></label><label class="mf-opt"><input type="checkbox" value="SANA"> <span>SANA</span></label><label class="mf-opt"><input type="checkbox" value="SEZL"> <span>SEZL</span></label><label class="mf-opt"><input type="checkbox" value="SION"> <span>SION</span></label><label class="mf-opt"><input type="checkbox" value="SKWD"> <span>SKWD</span></label><label class="mf-opt"><input type="checkbox" value="SLDB"> <span>SLDB</span></label><label class="mf-opt"><input type="checkbox" value="SLS"> <span>SLS</span></label><label class="mf-opt"><input type="checkbox" value="SNDK"> <span>SNDK</span></label><label class="mf-opt"><input type="checkbox" value="SNDX"> <span>SNDX</span></label><label class="mf-opt"><input type="checkbox" value="SRAD"> <span>SRAD</span></label><label class="mf-opt"><input type="checkbox" value="STRL"> <span>STRL</span></label><label class="mf-opt"><input type="checkbox" value="STUB"> <span>STUB</span></label><label class="mf-opt"><input type="checkbox" value="SUPV"> <span>SUPV</span></label><label class="mf-opt"><input type="checkbox" value="TDOC"> <span>TDOC</span></label><label class="mf-opt"><input type="checkbox" value="TECH"> <span>TECH</span></label><label class="mf-opt"><input type="checkbox" value="TECX"> <span>TECX</span></label><label class="mf-opt"><input type="checkbox" value="TENB"> <span>TENB</span></label><label class="mf-opt"><input type="checkbox" value="TGTX"> <span>TGTX</span></label><label class="mf-opt"><input type="checkbox" value="TMC"> <span>TMC</span></label><label class="mf-opt"><input type="checkbox" value="TNGX"> <span>TNGX</span></label><label class="mf-opt"><input type="checkbox" value="TRVI"> <span>TRVI</span></label><label class="mf-opt"><input type="checkbox" value="TSM"> <span>TSM</span></label><label class="mf-opt"><input type="checkbox" value="TTE"> <span>TTE</span></label><label class="mf-opt"><input type="checkbox" value="TTE.PA"> <span>TTE.PA</span></label><label class="mf-opt"><input type="checkbox" value="TWST"> <span>TWST</span></label><label class="mf-opt"><input type="checkbox" value="TXG"> <span>TXG</span></label><label class="mf-opt"><input type="checkbox" value="UMC"> <span>UMC</span></label><label class="mf-opt"><input type="checkbox" value="URGN"> <span>URGN</span></label><label class="mf-opt"><input type="checkbox" value="VCYT"> <span>VCYT</span></label><label class="mf-opt"><input type="checkbox" value="VITL"> <span>VITL</span></label><label class="mf-opt"><input type="checkbox" value="VKTX"> <span>VKTX</span></label><label class="mf-opt"><input type="checkbox" value="VOR"> <span>VOR</span></label><label class="mf-opt"><input type="checkbox" value="VRDN"> <span>VRDN</span></label><label class="mf-opt"><input type="checkbox" value="VRNS"> <span>VRNS</span></label><label class="mf-opt"><input type="checkbox" value="VSCO"> <span>VSCO</span></label><label class="mf-opt"><input type="checkbox" value="VSTM"> <span>VSTM</span></label><label class="mf-opt"><input type="checkbox" value="VYX"> <span>VYX</span></label><label class="mf-opt"><input type="checkbox" value="WDC"> <span>WDC</span></label><label class="mf-opt"><input type="checkbox" value="WGS"> <span>WGS</span></label><label class="mf-opt"><input type="checkbox" value="WNC"> <span>WNC</span></label><label class="mf-opt"><input type="checkbox" value="WOLF"> <span>WOLF</span></label><label class="mf-opt"><input type="checkbox" value="XAU"> <span>XAU</span></label><label class="mf-opt"><input type="checkbox" value="XERS"> <span>XERS</span></label><label class="mf-opt"><input type="checkbox" value="XNCR"> <span>XNCR</span></label><label class="mf-opt"><input type="checkbox" value="XOM"> <span>XOM</span></label><label class="mf-opt"><input type="checkbox" value="YEXT"> <span>YEXT</span></label><label class="mf-opt"><input type="checkbox" value="ZBIO"> <span>ZBIO</span></label><label class="mf-opt"><input type="checkbox" value="ZVRA"> <span>ZVRA</span></label></div>
+    </div>
+  </div>
+      <div class="field mf" data-mf="bsector">
+    <span class="field-label">Sector</span>
+    <button type="button" class="mf-trigger" aria-haspopup="listbox" aria-expanded="false">
+      <span class="mf-label">All</span><span class="mf-caret" aria-hidden="true">▾</span>
+    </button>
+    <div class="mf-panel" hidden>
+      <div class="mf-actions">
+        <button type="button" class="mf-action" data-mf-action="clear" data-mf="bsector">Clear</button>
+        <button type="button" class="mf-action" data-mf-action="all" data-mf="bsector">All</button>
+      </div>
+      <div class="mf-opts"><label class="mf-opt"><input type="checkbox" value="Communication Services"> <span>Communication Services</span></label><label class="mf-opt"><input type="checkbox" value="Consumer Discretionary"> <span>Consumer Discretionary</span></label><label class="mf-opt"><input type="checkbox" value="Consumer Staples"> <span>Consumer Staples</span></label><label class="mf-opt"><input type="checkbox" value="Energy"> <span>Energy</span></label><label class="mf-opt"><input type="checkbox" value="Financials"> <span>Financials</span></label><label class="mf-opt"><input type="checkbox" value="Health Care"> <span>Health Care</span></label><label class="mf-opt"><input type="checkbox" value="Industrials"> <span>Industrials</span></label><label class="mf-opt"><input type="checkbox" value="Information Technology"> <span>Information Technology</span></label><label class="mf-opt"><input type="checkbox" value="Real Estate"> <span>Real Estate</span></label><label class="mf-opt"><input type="checkbox" value="Unknown"> <span>Unknown</span></label></div>
+    </div>
+  </div>
+      <div class="field mf" data-mf="bverdict">
+    <span class="field-label">Verdict</span>
+    <button type="button" class="mf-trigger" aria-haspopup="listbox" aria-expanded="false">
+      <span class="mf-label">All</span><span class="mf-caret" aria-hidden="true">▾</span>
+    </button>
+    <div class="mf-panel" hidden>
+      <div class="mf-actions">
+        <button type="button" class="mf-action" data-mf-action="clear" data-mf="bverdict">Clear</button>
+        <button type="button" class="mf-action" data-mf-action="all" data-mf="bverdict">All</button>
+      </div>
+      <div class="mf-opts"><label class="mf-opt"><input type="checkbox" value="ADD-NOW"> <span>ADD-NOW</span></label><label class="mf-opt"><input type="checkbox" value="BUY"> <span>BUY</span></label><label class="mf-opt"><input type="checkbox" value="GRADUATE-OR-CULL"> <span>GRADUATE-OR-CULL</span></label><label class="mf-opt"><input type="checkbox" value="NO ACTION"> <span>NO ACTION</span></label><label class="mf-opt"><input type="checkbox" value="SELL"> <span>SELL</span></label><label class="mf-opt"><input type="checkbox" value="TRACKED"> <span>TRACKED</span></label><label class="mf-opt"><input type="checkbox" value="TRIM"> <span>TRIM</span></label><label class="mf-opt"><input type="checkbox" value="WATCH"> <span>WATCH</span></label><label class="mf-opt"><input type="checkbox" value="WRITE-THESIS-OR-CULL"> <span>WRITE-THESIS-OR-CULL</span></label></div>
+    </div>
+  </div>
+      <div class="field mf" data-mf="bauth">
+    <span class="field-label">Authority</span>
+    <button type="button" class="mf-trigger" aria-haspopup="listbox" aria-expanded="false">
+      <span class="mf-label">All</span><span class="mf-caret" aria-hidden="true">▾</span>
+    </button>
+    <div class="mf-panel" hidden>
+      <div class="mf-actions">
+        <button type="button" class="mf-action" data-mf-action="clear" data-mf="bauth">Clear</button>
+        <button type="button" class="mf-action" data-mf-action="all" data-mf="bauth">All</button>
+      </div>
+      <div class="mf-opts"><label class="mf-opt"><input type="checkbox" value="ACTIVE"> <span>Active</span></label><label class="mf-opt"><input type="checkbox" value="ARMING"> <span>Arming</span></label><label class="mf-opt"><input type="checkbox" value="RESEARCH_ONLY"> <span>Research</span></label></div>
+    </div>
+  </div>
+      <div class="field mf" data-mf="bheld">
+    <span class="field-label">Held</span>
+    <button type="button" class="mf-trigger" aria-haspopup="listbox" aria-expanded="false">
+      <span class="mf-label">All</span><span class="mf-caret" aria-hidden="true">▾</span>
+    </button>
+    <div class="mf-panel" hidden>
+      <div class="mf-actions">
+        <button type="button" class="mf-action" data-mf-action="clear" data-mf="bheld">Clear</button>
+        <button type="button" class="mf-action" data-mf-action="all" data-mf="bheld">All</button>
+      </div>
+      <div class="mf-opts"><label class="mf-opt"><input type="checkbox" value="true"> <span>Held</span></label><label class="mf-opt"><input type="checkbox" value="false"> <span>Not held</span></label></div>
+    </div>
+  </div>
+      <div class="field"><span class="field-label" for="bdate">Date</span><input id="bdate" type="date" value="2026-07-08"></div>
     </div>
     <div class="toolcard-meta"><span id="boardCount">—</span><span id="boardVisible">30</span> shown</div>
     <div class="table-wrap">
@@ -490,15 +568,51 @@ footer{margin-top:3rem;padding-top:1.5rem;border-top:1px solid var(--border);fon
 <section class="panel" id="panel-ledger">
   <div class="section-head">
     <h2>Decision ledger</h2>
-    <p>Latest 200 of 1,453 tracked receipts. <a href="ledger.json">ledger.json</a></p>
+    <p>Latest 200 of 1,453 tracked receipts. Multi-select filters; empty = all. <a href="ledger.json">ledger.json</a></p>
   </div>
   <div class="toolcard">
     <div class="toolcard-filters">
-      <div class="field"><label for="q">Search</label><input id="q" type="search" placeholder="Ticker, thesis…" autocomplete="off"></div>
-      <div class="field"><label for="type">Type</label><select id="type"><option value="ALL">All</option><option>FORECAST</option><option>ACTION</option><option>EXIT</option><option>REJECT</option><option>CATALYST</option></select></div>
-      <div class="field"><label for="status">Status</label><select id="status"><option value="ALL">All</option><option value="OPEN">Awaiting</option><option value="RESOLVED">Graded</option><option value="UNRESOLVABLE">Unresolvable</option></select></div>
-      <div class="field"><label for="from">From</label><input id="from" type="date"></div>
-      <div class="field"><label for="to">To</label><input id="to" type="date"></div>
+      <div class="field mf" data-mf="lticker">
+    <span class="field-label">Ticker</span>
+    <button type="button" class="mf-trigger" aria-haspopup="listbox" aria-expanded="false">
+      <span class="mf-label">All</span><span class="mf-caret" aria-hidden="true">▾</span>
+    </button>
+    <div class="mf-panel" hidden>
+      <div class="mf-actions">
+        <button type="button" class="mf-action" data-mf-action="clear" data-mf="lticker">Clear</button>
+        <button type="button" class="mf-action" data-mf-action="all" data-mf="lticker">All</button>
+      </div>
+      <div class="mf-opts"><label class="mf-opt"><input type="checkbox" value="7011.T"> <span>7011.T</span></label><label class="mf-opt"><input type="checkbox" value="8058.T"> <span>8058.T</span></label><label class="mf-opt"><input type="checkbox" value="ACHR"> <span>ACHR</span></label><label class="mf-opt"><input type="checkbox" value="ALMS"> <span>ALMS</span></label><label class="mf-opt"><input type="checkbox" value="ALOY"> <span>ALOY</span></label><label class="mf-opt"><input type="checkbox" value="AMD"> <span>AMD</span></label><label class="mf-opt"><input type="checkbox" value="ATEX"> <span>ATEX</span></label><label class="mf-opt"><input type="checkbox" value="AVGO"> <span>AVGO</span></label><label class="mf-opt"><input type="checkbox" value="BBAR"> <span>BBAR</span></label><label class="mf-opt"><input type="checkbox" value="BEN"> <span>BEN</span></label><label class="mf-opt"><input type="checkbox" value="BRBR"> <span>BRBR</span></label><label class="mf-opt"><input type="checkbox" value="BTI"> <span>BTI</span></label><label class="mf-opt"><input type="checkbox" value="CBRL"> <span>CBRL</span></label><label class="mf-opt"><input type="checkbox" value="CECO"> <span>CECO</span></label><label class="mf-opt"><input type="checkbox" value="COP"> <span>COP</span></label><label class="mf-opt"><input type="checkbox" value="EOG"> <span>EOG</span></label><label class="mf-opt"><input type="checkbox" value="FAC"> <span>FAC</span></label><label class="mf-opt"><input type="checkbox" value="GEV"> <span>GEV</span></label><label class="mf-opt"><input type="checkbox" value="HAE"> <span>HAE</span></label><label class="mf-opt"><input type="checkbox" value="HUM"> <span>HUM</span></label><label class="mf-opt"><input type="checkbox" value="IONQ"> <span>IONQ</span></label><label class="mf-opt"><input type="checkbox" value="LLY"> <span>LLY</span></label><label class="mf-opt"><input type="checkbox" value="LUNR"> <span>LUNR</span></label><label class="mf-opt"><input type="checkbox" value="MAX"> <span>MAX</span></label><label class="mf-opt"><input type="checkbox" value="MIDD"> <span>MIDD</span></label><label class="mf-opt"><input type="checkbox" value="MRVL"> <span>MRVL</span></label><label class="mf-opt"><input type="checkbox" value="MU"> <span>MU</span></label><label class="mf-opt"><input type="checkbox" value="NNE"> <span>NNE</span></label><label class="mf-opt"><input type="checkbox" value="PDN.AX"> <span>PDN.AX</span></label><label class="mf-opt"><input type="checkbox" value="PFE"> <span>PFE</span></label><label class="mf-opt"><input type="checkbox" value="QCOM"> <span>QCOM</span></label><label class="mf-opt"><input type="checkbox" value="QUBT"> <span>QUBT</span></label><label class="mf-opt"><input type="checkbox" value="RGTI"> <span>RGTI</span></label><label class="mf-opt"><input type="checkbox" value="RL"> <span>RL</span></label><label class="mf-opt"><input type="checkbox" value="SUPV"> <span>SUPV</span></label><label class="mf-opt"><input type="checkbox" value="TMC"> <span>TMC</span></label><label class="mf-opt"><input type="checkbox" value="TNGX"> <span>TNGX</span></label><label class="mf-opt"><input type="checkbox" value="TSM"> <span>TSM</span></label><label class="mf-opt"><input type="checkbox" value="TTE"> <span>TTE</span></label><label class="mf-opt"><input type="checkbox" value="TWST"> <span>TWST</span></label><label class="mf-opt"><input type="checkbox" value="UMC"> <span>UMC</span></label><label class="mf-opt"><input type="checkbox" value="VKTX"> <span>VKTX</span></label><label class="mf-opt"><input type="checkbox" value="WGS"> <span>WGS</span></label><label class="mf-opt"><input type="checkbox" value="WOLF"> <span>WOLF</span></label><label class="mf-opt"><input type="checkbox" value="XOM"> <span>XOM</span></label></div>
+    </div>
+  </div>
+      <div class="field mf" data-mf="ltype">
+    <span class="field-label">Type</span>
+    <button type="button" class="mf-trigger" aria-haspopup="listbox" aria-expanded="false">
+      <span class="mf-label">All</span><span class="mf-caret" aria-hidden="true">▾</span>
+    </button>
+    <div class="mf-panel" hidden>
+      <div class="mf-actions">
+        <button type="button" class="mf-action" data-mf-action="clear" data-mf="ltype">Clear</button>
+        <button type="button" class="mf-action" data-mf-action="all" data-mf="ltype">All</button>
+      </div>
+      <div class="mf-opts"><label class="mf-opt"><input type="checkbox" value="FORECAST"> <span>Forecast</span></label><label class="mf-opt"><input type="checkbox" value="ACTION"> <span>Action</span></label><label class="mf-opt"><input type="checkbox" value="EXIT"> <span>Exit</span></label><label class="mf-opt"><input type="checkbox" value="REJECT"> <span>Reject</span></label><label class="mf-opt"><input type="checkbox" value="CATALYST"> <span>Catalyst</span></label></div>
+    </div>
+  </div>
+      <div class="field mf" data-mf="lstatus">
+    <span class="field-label">Status</span>
+    <button type="button" class="mf-trigger" aria-haspopup="listbox" aria-expanded="false">
+      <span class="mf-label">All</span><span class="mf-caret" aria-hidden="true">▾</span>
+    </button>
+    <div class="mf-panel" hidden>
+      <div class="mf-actions">
+        <button type="button" class="mf-action" data-mf-action="clear" data-mf="lstatus">Clear</button>
+        <button type="button" class="mf-action" data-mf-action="all" data-mf="lstatus">All</button>
+      </div>
+      <div class="mf-opts"><label class="mf-opt"><input type="checkbox" value="OPEN"> <span>Awaiting</span></label><label class="mf-opt"><input type="checkbox" value="RESOLVED"> <span>Graded</span></label><label class="mf-opt"><input type="checkbox" value="UNRESOLVABLE"> <span>Unresolvable</span></label></div>
+    </div>
+  </div>
+      <div class="field"><span class="field-label" for="from">From</span><input id="from" type="date"></div>
+      <div class="field"><span class="field-label" for="to">To</span><input id="to" type="date"></div>
     </div>
     <div class="toolcard-meta"><span id="resultCount">—</span><span id="visibleCount">25</span> shown</div>
     <div class="table-wrap">
@@ -578,22 +692,86 @@ function statusTag(s){
 }
 function fmtPct(n){ return n==null?'—':((n>0?'+':'')+n+'%'); }
 
+/* —— multi-select filters (shared) —— */
+function mfSelected(id){
+  var wrap = document.querySelector('.mf[data-mf="'+id+'"]');
+  if(!wrap) return [];
+  return Array.prototype.slice.call(wrap.querySelectorAll('.mf-panel input:checked')).map(function(b){ return b.value; });
+}
+function mfMatches(selected, value){
+  if(!selected.length) return true;
+  return selected.indexOf(String(value)) >= 0;
+}
+function mfUpdateLabel(wrap){
+  var label = wrap.querySelector('.mf-label');
+  var boxes = wrap.querySelectorAll('.mf-panel input[type=checkbox]');
+  var sel = Array.prototype.slice.call(boxes).filter(function(b){ return b.checked; }).map(function(b){ return b.value; });
+  if(!sel.length) label.textContent = 'All';
+  else if(sel.length === 1){
+    var checked = wrap.querySelector('.mf-panel input:checked');
+    var span = checked && checked.parentElement ? checked.parentElement.querySelector('span') : null;
+    label.textContent = span ? span.textContent : sel[0];
+  }
+  else label.textContent = sel.length + ' selected';
+}
+function initMultiFilters(){
+  document.querySelectorAll('.mf').forEach(function(wrap){
+    var trigger = wrap.querySelector('.mf-trigger');
+    var panel = wrap.querySelector('.mf-panel');
+    var boxes = panel.querySelectorAll('input[type=checkbox]');
+    function apply(){
+      mfUpdateLabel(wrap);
+      var id = wrap.getAttribute('data-mf') || '';
+      if(id.charAt(0) === 'b') refreshBoard();
+      else refreshLedger();
+    }
+    trigger.addEventListener('click', function(e){
+      e.stopPropagation();
+      var willOpen = panel.hidden;
+      document.querySelectorAll('.mf-panel').forEach(function(p){ p.hidden = true; });
+      document.querySelectorAll('.mf-trigger').forEach(function(t){ t.setAttribute('aria-expanded','false'); });
+      if(willOpen){ panel.hidden = false; trigger.setAttribute('aria-expanded','true'); }
+    });
+    panel.addEventListener('click', function(e){ e.stopPropagation(); });
+    boxes.forEach(function(b){ b.addEventListener('change', apply); });
+  });
+  document.querySelectorAll('[data-mf-action]').forEach(function(btn){
+    btn.addEventListener('click', function(e){
+      e.stopPropagation();
+      var id = btn.getAttribute('data-mf');
+      var wrap = document.querySelector('.mf[data-mf="'+id+'"]');
+      if(!wrap) return;
+      var boxes = wrap.querySelectorAll('.mf-panel input[type=checkbox]');
+      var selectAll = btn.getAttribute('data-mf-action') === 'all';
+      boxes.forEach(function(b){ b.checked = selectAll; });
+      mfUpdateLabel(wrap);
+      if(id && id.charAt(0) === 'b') refreshBoard();
+      else refreshLedger();
+    });
+  });
+  document.addEventListener('click', function(){
+    document.querySelectorAll('.mf-panel').forEach(function(p){ p.hidden = true; });
+    document.querySelectorAll('.mf-trigger').forEach(function(t){ t.setAttribute('aria-expanded','false'); });
+  });
+}
+
 /* —— board —— */
 var boardEls = {
-  q: document.getElementById('bq'), verdict: document.getElementById('bverdict'),
-  auth: document.getElementById('bauth'), held: document.getElementById('bheld'), date: document.getElementById('bdate'),
+  date: document.getElementById('bdate'),
   body: document.getElementById('boardBody'), count: document.getElementById('boardCount'),
   visible: document.getElementById('boardVisible'), more: document.getElementById('boardMore')
 };
 function boardMatches(r){
-  var q = boardEls.q.value.trim().toLowerCase();
-  var hay = [r.ticker,r.verdict,r.authority,r.sector,r.subIndustry,r.note,r.buyBoardLane,r.historicalEdge,r.themeRadar].join(' ').toLowerCase();
-  if(q && hay.indexOf(q)<0) return false;
-  if(boardEls.verdict.value!=='ALL' && r.verdict!==boardEls.verdict.value) return false;
-  if(boardEls.auth.value!=='ALL' && r.authority!==boardEls.auth.value) return false;
-  if(boardEls.held.value==='true' && r.held!==true) return false;
-  if(boardEls.held.value==='false' && r.held!==false) return false;
-  if(boardEls.date.value && r.date!==boardEls.date.value) return false;
+  if(!mfMatches(mfSelected('bticker'), r.ticker)) return false;
+  if(!mfMatches(mfSelected('bsector'), r.sector || '')) return false;
+  if(!mfMatches(mfSelected('bverdict'), r.verdict)) return false;
+  if(!mfMatches(mfSelected('bauth'), r.authority)) return false;
+  var heldSel = mfSelected('bheld');
+  if(heldSel.length){
+    var heldVal = r.held === true ? 'true' : 'false';
+    if(heldSel.indexOf(heldVal) < 0) return false;
+  }
+  if(boardEls.date.value && r.date !== boardEls.date.value) return false;
   return true;
 }
 function renderBoard(reset){
@@ -632,17 +810,14 @@ function renderBoard(reset){
 
 /* —— ledger —— */
 var els = {
-  q:document.getElementById('q'), type:document.getElementById('type'), status:document.getElementById('status'),
   from:document.getElementById('from'), to:document.getElementById('to'),
   body:document.getElementById('ledgerBody'), count:document.getElementById('resultCount'),
   visible:document.getElementById('visibleCount'), more:document.getElementById('showMore')
 };
 function rowMatches(r){
-  var q=els.q.value.trim().toLowerCase();
-  var hay=(r.decidedAt+' '+r.type+' '+r.ticker+' '+r.action+' '+r.statement).toLowerCase();
-  if(q && hay.indexOf(q)<0) return false;
-  if(els.type.value!=='ALL' && r.type!==els.type.value) return false;
-  if(els.status.value!=='ALL' && r.status!==els.status.value) return false;
+  if(!mfMatches(mfSelected('lticker'), r.ticker)) return false;
+  if(!mfMatches(mfSelected('ltype'), r.type)) return false;
+  if(!mfMatches(mfSelected('lstatus'), r.status)) return false;
   if(els.from.value && r.decidedAt < els.from.value) return false;
   if(els.to.value && r.decidedAt > els.to.value) return false;
   return true;
@@ -677,10 +852,11 @@ function renderExplorer(reset){
   }
 }
 
-['input','change'].forEach(function(evt){
-  ['q','verdict','auth','held','date'].forEach(function(k){ if(boardEls[k]) boardEls[k].addEventListener(evt,function(){renderBoard(true);}); });
-  ['q','type','status','from','to'].forEach(function(k){ els[k].addEventListener(evt,function(){renderExplorer(true);}); });
-});
+function refreshBoard(){ renderBoard(true); }
+function refreshLedger(){ renderExplorer(true); }
+initMultiFilters();
+if(boardEls.date) boardEls.date.addEventListener('change', refreshBoard);
+['from','to'].forEach(function(k){ if(els[k]) els[k].addEventListener('change', refreshLedger); });
 boardEls.more.addEventListener('click',function(){ boardLimit+=30; renderBoard(false); });
 els.more.addEventListener('click',function(){ limit+=25; renderExplorer(false); });
 renderBoard(true);
