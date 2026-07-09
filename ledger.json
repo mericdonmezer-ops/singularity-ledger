@@ -1,6 +1,6 @@
 {
  "$schema": "Singularity verified decision ledger. Append-only. Claim fields are immutable after publication (claimHash); outcome fields are filled mechanically by the resolver. Integrity: chain.jsonl hash chain + git history.",
- "generatedAt": "2026-07-08T22:44:28.950Z",
+ "generatedAt": "2026-07-09T06:47:46.472Z",
  "records": [
   {
    "id": "2026-02-02-MU-EXIT",
