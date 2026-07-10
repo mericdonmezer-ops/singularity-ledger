@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Case study — RHM stop cascade — Singularity Ledger</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f3f5f9;--surface:#fff;--border:#d8dee8;--text:#151a26;--muted:#5a6272;--accent:#2563eb;--red:#dc2626;--green:#059669;--font:'DM Sans',system-ui,sans-serif}
+body{margin:0;font-family:var(--font);background:var(--bg);color:var(--text);line-height:1.65}
+a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
+.topbar{border-bottom:1px solid var(--border);background:#fff;padding:.9rem 1.25rem}
+.topbar-inner{max-width:820px;margin:0 auto;display:flex;gap:1rem;align-items:center;flex-wrap:wrap}
+.brand{font-weight:700;color:var(--text)}
+.nav a{font-size:.85rem;font-weight:600;color:var(--muted);margin-right:.75rem}
+.wrap{max-width:820px;margin:0 auto;padding:2rem 1.25rem 4rem}
+h1{font-size:1.9rem;letter-spacing:-.03em;margin:0 0 .5rem}
+h2{font-size:1.1rem;margin:2rem 0 .5rem}
+p,li{color:#3a4150}
+.muted{color:var(--muted);font-size:.9rem}
+table{width:100%;border-collapse:collapse;font-size:.88rem;margin:1rem 0}
+th{text-align:left;font-size:.68rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);padding:.5rem .6rem;border-bottom:1px solid var(--border)}
+td{padding:.55rem .6rem;border-bottom:1px solid var(--border);vertical-align:top}
+.bad{color:var(--red);font-weight:600}
+.good{color:var(--green);font-weight:600}
+.callout{background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);padding:1rem 1.1rem;border-radius:8px;margin:1.25rem 0}
+</style>
+</head>
+<body>
+<header class="topbar"><div class="topbar-inner">
+  <a class="brand" href="index.html">Singularity Ledger</a>
+  <nav class="nav">
+    <a href="index.html">Overview</a>
+    <a href="methodology.html">Methodology</a>
+    <a href="about.html">About</a>
+    <a href="case-study-rhm.html">Case study</a>
+  </nav>
+</div></header>
+<main class="wrap"><p class="muted">Governance failure caught in production · Apr 2026 · stop-discipline rule origin</p>
+<h1>When the stop moves down instead of selling</h1>
+<p>Rheinmetall (RHM) was a defense anchor opened Mar 2026. Price drifted below three consecutive stop levels across four daily runs. The system <strong>lowered the stop each time</strong> instead of executing the documented trim — then kept issuing ADD signals on the same losing thesis.</p>
+
+<h2>Timeline</h2>
+<table>
+<thead><tr><th>Date</th><th>Price zone</th><th>Stop written</th><th>What should have happened</th></tr></thead>
+<tbody>
+<tr><td>2026-04-20</td><td>€1,459</td><td>€1,450</td><td>Original commitment</td></tr>
+<tr><td>2026-04-22</td><td>breaks €1,450</td><td class="bad">€1,420 (silent)</td><td class="bad">TRIM per killScenario — no thesis note</td></tr>
+<tr><td>2026-04-23</td><td>€1,363</td><td class="bad">€1,380</td><td class="bad">Exit or logged revision — neither</td></tr>
+<tr><td>2026-04-24</td><td>€1,317</td><td class="bad">€1,300</td><td class="bad">ADD +7 at score 74 same day</td></tr>
+</tbody>
+</table>
+
+<h2>Cost of the anti-pattern</h2>
+<ul>
+<li>Intended: −3% stop-out on Apr 20 breach → trim 3 shares, −3% realized.</li>
+<li>Actual: open hole grew to <strong>−13% unrealized</strong> while the book chased the loser with ADDs.</li>
+<li>User caught it Apr 24: <em>"stop sessizce 3× aşağı çekildi"</em> — classic moving-the-stop behavior.</li>
+</ul>
+
+<div class="callout">
+<strong>Governance fix (stop-discipline rule):</strong> stops may tighten, never loosen without a dated, testable <code>thesisRevision</code>. If price breaches the published stop and no revision exists → mechanical exit row, not a rewritten stop. Build QC tag: <code>STOP LOWERED SILENTLY</code>.
+</div>
+
+<h2>What the ledger would show today</h2>
+<p>Each run's stop level and ADD recommendation are separate receipts. A verifier sees:</p>
+<ol>
+<li>ACTION rows recommending ADD while price is below the prior stop — contradiction on its face.</li>
+<li>No EXIT row when the stop was hit — accountability gap.</li>
+<li>After the rule: either TRIM at breach or an explicit revision log; silent rewrites fail QC.</li>
+</ol>
+
+<p class="muted">This is why the product sells <strong>process integrity</strong>, not picks. The miss stays visible; the rule change is mechanized so the same failure mode cannot hide in narrative drift.</p>
+
+<p><a href="methodology.html">← Methodology</a> · <a href="index.html">Live ledger</a></p></main>
+</body></html>
