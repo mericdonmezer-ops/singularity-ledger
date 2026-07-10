@@ -2,48 +2,55 @@
 <html lang="en"><head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Methodology — Singularity Ledger</title>
+<title>Methodology — Decision Ledger</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#f3f5f9;--surface:#fff;--border:#d8dee8;--text:#151a26;--muted:#5a6272;--accent:#2563eb;--font:'DM Sans',system-ui,sans-serif}
+:root{--bg:#eef2f6;--surface:#fff;--border:#d7dee8;--text:#122033;--ink:#122033;--muted:#64748b;--accent:#155eef;--font:'DM Sans',system-ui,sans-serif}
 body{margin:0;font-family:var(--font);background:var(--bg);color:var(--text);line-height:1.6}
 a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
-.topbar{border-bottom:1px solid var(--border);background:#fff;padding:.9rem 1.25rem}
-.topbar-inner{max-width:820px;margin:0 auto;display:flex;gap:1rem;align-items:center}
-.brand{font-weight:700;color:var(--text)}
-.nav a{font-size:.85rem;font-weight:600;color:var(--muted);margin-right:.75rem}
-.wrap{max-width:820px;margin:0 auto;padding:2rem 1.25rem 4rem}
+.topbar{position:sticky;top:0;z-index:100;border-bottom:1px solid var(--border);background:rgba(255,255,255,.94);backdrop-filter:blur(12px)}
+.topbar-inner{max-width:1320px;margin:0 auto;padding:0 1.25rem;display:flex;align-items:center;gap:1.5rem;height:56px;min-width:0}
+.brand{display:flex;align-items:center;gap:.6rem;font-weight:700;font-size:.95rem;letter-spacing:-.02em;color:var(--text);white-space:nowrap}
+.brand-dot{width:8px;height:8px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 3px rgba(21,94,239,.12)}
+.nav{display:flex;gap:.15rem;flex:1;overflow-x:auto;white-space:nowrap;min-width:0}
+.nav a{font-size:.82rem;font-weight:600;color:var(--muted);padding:.45rem .75rem;border-radius:5px;margin-right:0;text-decoration:none}
+.nav a:hover{color:var(--text);background:#f5f7fa}
+.nav a.active{color:#fff;background:var(--accent)}
+.wrap{max-width:1320px;margin:0 auto;padding:2.5rem 1.25rem 4rem}
+.wrap>*{max-width:820px}
 h1{font-size:1.9rem;letter-spacing:-.03em;margin:0 0 .75rem}
 h2{font-size:1.1rem;margin:2rem 0 .5rem}
-p,li{color:#3a4150}
+p,li{color:#40516a}
 .muted{color:var(--muted);font-size:.9rem}
-code{background:#eef1f6;padding:.1em .35em;border-radius:4px;font-size:.9em}
+code{background:#e8eef6;color:#1246ad;padding:.1em .35em;border-radius:4px;font-size:.9em}
 </style>
 </head>
 <body>
 <header class="topbar"><div class="topbar-inner">
-  <a class="brand" href="index.html">Singularity Ledger</a>
+  <a class="brand" href="index.html"><span class="brand-dot"></span>Decision Ledger</a>
   <nav class="nav">
-    <a href="index.html">Overview</a>
-    <a href="methodology.html">Methodology</a>
-    <a href="about.html">About</a>
-    <a href="case-studies.html">Case studies</a>
+    <a class="" href="index.html">Overview</a>
+    <a href="index.html#board">Daily Board</a>
+    <a href="index.html#receipts">Receipts</a>
+    <a class="active" href="methodology.html">Methodology</a>
+    <a class="" href="case-studies.html">Case studies</a>
+    <a class="" href="about.html">About</a>
   </nav>
 </div></header>
 <main class="wrap"><h1>Methodology</h1>
-<p class="muted">How claims enter the chain, how outcomes are scored, and what integrity guarantees exist.</p>
+<p class="muted">The smallest useful loop: decision → receipt → outcome → grade → policy change.</p>
 <h2>Two tiers</h2>
 <ul>
 <li><strong>LIVE</strong> — first published while the outcome was still unknown. This is the verifiable tier.</li>
 <li><strong>ARCHIVE</strong> — backfilled from internal logs after outcomes were knowable. Real history, not pre-registration.</li>
 </ul>
-<h2>Data flow</h2>
+<h2>How a customer would use it</h2>
 <ol>
-<li>Run-engine decisions land in append-only warehouse streams (<code>action-outcomes</code>, <code>rejected-outcomes</code>, <code>forecast-outcomes</code>, etc.).</li>
-<li><code>packages/ledger</code> extracts, scrubs sensitive fields, and merges into <code>ledger.json</code>.</li>
-<li>Each build appends a hash-chained block — editing a published claim breaks <code>npm run verify</code>.</li>
-<li>Static site renders aggregates: Brier score, hit rate, honesty metrics (correct avoids vs missed winners).</li>
+<li>Your agent emits a structured receipt at the moment it makes a consequential decision.</li>
+<li>The receipt captures the claim, authority tier, evidence reference, and resolution window — not a vague chat transcript.</li>
+<li>The ledger seals the record with a hash chain. Published claims cannot be silently rewritten.</li>
+<li>When the window closes, a resolver grades the outcome and exposes calibration, misses, and policy regressions.</li>
 </ol>
 <h2>Scoring</h2>
 <ul>
@@ -51,8 +58,10 @@ code{background:#eef1f6;padding:.1em .35em;border-radius:4px;font-size:.9em}
 <li><strong>Rejections</strong> — forward return on names we said no to (20d window).</li>
 <li><strong>Exits</strong> — post-sell drift vs thesis (good exit vs churn).</li>
 </ul>
-<h2>Publish QC (Faz 0+)</h2>
-<p>Build fails if public text contains mojibake, unfilled placeholders (<code>[n]</code>, <code>TBD</code>), or empty claims. Position share counts are stripped — only rationale and policy thresholds remain.</p>
+<h2>Why this is useful</h2>
+<p>Agent teams already have traces, evals, and observability. Decision Ledger covers the gap after an agent says “do this”: was it allowed to decide, was the claim registered before the result, did it resolve, and did the team change policy when it failed?</p>
+<h2>Publish QC</h2>
+<p>Build fails on empty claims, placeholders, encoding errors, stale source rows, and integrity mismatches. The public reference instance also scrubs private account details before publication.</p>
 <h2>Integrity</h2>
 <p>Claim hash covers immutable fields (id, type, date, ticker, statement, probability, resolve-by). Resolution fields may update; claims may not. Git history of the public repo is a second tamper-evidence layer.</p></main>
 </body></html>
