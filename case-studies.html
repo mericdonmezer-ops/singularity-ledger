@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Case studies — Singularity Ledger</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f3f5f9;--surface:#fff;--border:#d8dee8;--text:#151a26;--muted:#5a6272;--accent:#2563eb;--red:#dc2626;--green:#059669;--font:'DM Sans',system-ui,sans-serif}
+body{margin:0;font-family:var(--font);background:var(--bg);color:var(--text);line-height:1.65}
+a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
+.topbar{border-bottom:1px solid var(--border);background:#fff;padding:.9rem 1.25rem}
+.topbar-inner{max-width:820px;margin:0 auto;display:flex;gap:1rem;align-items:center;flex-wrap:wrap}
+.brand{font-weight:700;color:var(--text)}
+.nav a{font-size:.85rem;font-weight:600;color:var(--muted);margin-right:.75rem}
+.wrap{max-width:820px;margin:0 auto;padding:2rem 1.25rem 4rem}
+h1{font-size:1.9rem;letter-spacing:-.03em;margin:0 0 .5rem}
+h2{font-size:1.1rem;margin:2rem 0 .5rem}
+p,li{color:#3a4150}
+.muted{color:var(--muted);font-size:.9rem}
+code{background:#eef1f6;padding:.1em .35em;border-radius:4px;font-size:.9em}
+table{width:100%;border-collapse:collapse;font-size:.88rem;margin:1rem 0}
+th{text-align:left;font-size:.68rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);padding:.5rem .6rem;border-bottom:1px solid var(--border)}
+td{padding:.55rem .6rem;border-bottom:1px solid var(--border);vertical-align:top}
+.bad{color:var(--red);font-weight:600}
+.good{color:var(--green);font-weight:600}
+.callout{background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent);padding:1rem 1.1rem;border-radius:8px;margin:1.25rem 0}
+.case-card{display:block;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.1rem 1.25rem;margin-bottom:.85rem;color:inherit}
+.case-card:hover{text-decoration:none;border-color:var(--accent)}
+.case-card h2{margin:.15rem 0 .35rem;font-size:1.05rem}
+.case-card .kicker{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted)}
+.case-card p{margin:0;font-size:.88rem;color:var(--muted)}
+</style>
+</head>
+<body>
+<header class="topbar"><div class="topbar-inner">
+  <a class="brand" href="index.html">Singularity Ledger</a>
+  <nav class="nav">
+    <a href="index.html">Overview</a>
+    <a href="methodology.html">Methodology</a>
+    <a href="about.html">About</a>
+    <a href="case-studies.html">Case studies</a>
+  </nav>
+</div></header>
+<main class="wrap"><h1>Case studies</h1>
+<p class="muted">Real governance failures from a production decision system — each one caught, costed, and closed with a mechanical rule. The misses are the product: they show the accountability loop actually runs.</p>
+<a class="case-card" href="case-study-rhm.html">
+  <div class="kicker">Governance failure caught in production · Apr 2026 · stop-discipline rule origin</div>
+  <h2>When the stop moves down instead of selling</h2>
+  <p>Price broke three consecutive stop levels; the system silently rewrote the stop each time and kept adding to the loser. The fix made silent stop-lowering a build error.</p>
+</a>
+<a class="case-card" href="case-study-zombie-sell.html">
+  <div class="kicker">State-drift failure · Apr 2026 · positions-as-single-source-of-truth rule origin</div>
+  <h2>The system recommended selling a position that no longer existed</h2>
+  <p>A SELL recommendation shipped for a ticker fully exited three weeks earlier — and sat unchallenged for nine days. The fix made every action row reconcile against the canonical holdings file.</p>
+</a>
+<a class="case-card" href="case-study-mu-churn.html">
+  <div class="kicker">Behavioral failure · Mar–Apr 2026 · stop-only-on-real-risk rule origin</div>
+  <h2>Selling the winner, then buying it back higher</h2>
+  <p>A reflexive 'lock profits' trim sold a compounding winner at $420 — which was then re-bought at $435 to $480 as the thesis kept working. The fix: no stop or trim without a dated bearish signal.</p>
+</a>
+<a class="case-card" href="case-study-avoid-ghosts.html">
+  <div class="kicker">Data-integrity failure · Apr 2026 · avoid-list-source-of-truth rule origin</div>
+  <h2>64 warnings, 30 of them about stocks nobody was looking at</h2>
+  <p>The 'do not buy' list had 64 rows — 30 of them for tickers not even in that day's screened universe, with stale numbers copied by hand. The fix: derived membership, derived numbers, zero hand-typed claims.</p>
+</a>
+<p class="muted" style="margin-top:1.5rem">Every incident above left receipts in the <a href="index.html">verified ledger</a>; the fixes are enforced by build-time QC, not by promises.</p></main>
+</body></html>
