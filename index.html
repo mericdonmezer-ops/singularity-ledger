@@ -239,10 +239,10 @@ footer{margin-top:3rem;padding-top:1.5rem;border-top:1px solid var(--border);fon
       <a class="hero-btn secondary" href="methodology.html">Read the method</a>
     </div>
     <div class="kpi-row">
-      <div class="kpi"><div class="kpi-val">4,692</div><div class="kpi-label">Receipts in chain</div><div class="kpi-sub">immutable decision records</div></div>
-      <div class="kpi"><div class="kpi-val">2188</div><div class="kpi-label">Live receipts</div><div class="kpi-sub">registered before outcome</div></div>
-      <div class="kpi"><div class="kpi-val">2,251</div><div class="kpi-label">Outcomes graded</div><div class="kpi-sub">mechanical resolution</div></div>
-      <div class="kpi"><div class="kpi-val">737</div><div class="kpi-label">Still unresolved</div><div class="kpi-sub">open claims · no retroactive grade</div></div>
+      <div class="kpi"><div class="kpi-val">4,693</div><div class="kpi-label">Receipts in chain</div><div class="kpi-sub">immutable decision records</div></div>
+      <div class="kpi"><div class="kpi-val">2189</div><div class="kpi-label">Live receipts</div><div class="kpi-sub">registered before outcome</div></div>
+      <div class="kpi"><div class="kpi-val">2,273</div><div class="kpi-label">Outcomes graded</div><div class="kpi-sub">mechanical resolution</div></div>
+      <div class="kpi"><div class="kpi-val">716</div><div class="kpi-label">Still unresolved</div><div class="kpi-sub">open claims · no retroactive grade</div></div>
     </div>
   </div>
 
@@ -251,7 +251,7 @@ footer{margin-top:3rem;padding-top:1.5rem;border-top:1px solid var(--border);fon
     <div class="card-grid">
       <div class="mini-card"><div class="val">0.26</div><div class="lbl">Brier score</div></div>
       <div class="mini-card"><div class="val">36%</div><div class="lbl">Forecast hit rate</div></div>
-      <div class="mini-card"><div class="val">859</div><div class="lbl">Rejections graded</div></div>
+      <div class="mini-card"><div class="val">864</div><div class="lbl">Rejections graded</div></div>
       <div class="mini-card"><div class="val">73</div><div class="lbl">Exits graded</div></div>
       <div class="mini-card"><div class="val">40</div><div class="lbl">Good exits</div></div>
       <div class="mini-card"><div class="val">10</div><div class="lbl">Churn exits</div></div>
@@ -261,7 +261,7 @@ footer{margin-top:3rem;padding-top:1.5rem;border-top:1px solid var(--border);fon
   <div class="section">
     <div class="section-head"><h2>Authority is data</h2><p>Every receipt says whether the system was allowed to act, still being tested, or research-only.</p></div>
     <div class="auth-strip">
-      <div class="auth-item active"><div class="auth-count">6</div><div class="auth-name">Action receipts</div><p class="auth-desc">Recorded decisions whose outcome window is still open.</p></div>
+      <div class="auth-item active"><div class="auth-count">7</div><div class="auth-name">Action receipts</div><p class="auth-desc">Recorded decisions whose outcome window is still open.</p></div>
       <div class="auth-item arming"><div class="auth-count">88</div><div class="auth-name">Forecast receipts</div><p class="auth-desc">Probability claims waiting for reality to answer.</p></div>
       <div class="auth-item research"><div class="auth-count">ARMING</div><div class="auth-name">Research signals</div><p class="auth-desc">Visible for context, not allowed to author production actions yet.</p></div>
     </div>
@@ -275,6 +275,11 @@ footer{margin-top:3rem;padding-top:1.5rem;border-top:1px solid var(--border);fon
           <thead><tr><th>Date</th><th>Type</th><th>Subject</th><th>Claim</th></tr></thead>
           <tbody>
             <tr>
+              <td class="dim">2026-11-13</td>
+              <td><span class="badge type-action">ACTION</span></td>
+              <td class="ticker">XAU</td>
+              <td class="claim-cell">TRIM — EV ledger #59 EV 4.2% (MED). 2026-11-13 GOLD-FLOOR-HIT: spot ~$3,900 below ratcheted floor $3,950 — TRIM 1 of 6 units (band 13.5%-&gt;~11.3%). EW BUILDING_BEARISH. | Prior: TRIM 3 units EXECUTED 2026-10-07 (9-&gt;6 units, mid 10-15% band).</td>
+            </tr><tr>
               <td class="dim">2026-11-13</td>
               <td><span class="badge type-catalyst">CATALYST</span></td>
               <td class="ticker">VOO</td>
@@ -309,11 +314,6 @@ footer{margin-top:3rem;padding-top:1.5rem;border-top:1px solid var(--border);fon
               <td><span class="badge type-reject">REJECT</span></td>
               <td class="ticker">LQDA</td>
               <td class="claim-cell">REJECT (avoid / other) — Previously held and sold at. Now — would be chasing a name we already exited.</td>
-            </tr><tr>
-              <td class="dim">2026-11-13</td>
-              <td><span class="badge type-reject">REJECT</span></td>
-              <td class="ticker">KXIN</td>
-              <td class="claim-cell">REJECT (avoid / thesis) — Screener candidate. Chinese consumer discretionary micro-cap — no thesis, extreme volatility.</td>
             </tr>
           </tbody>
         </table>
@@ -361,9 +361,9 @@ footer{margin-top:3rem;padding-top:1.5rem;border-top:1px solid var(--border);fon
     <div class="section-head"><h2>Proof, not promises</h2><p>Outcome grading is the product surface. The public reference instance uses market outcomes; another agent workflow can provide its own resolver.</p></div>
     <p class="muted" style="font-size:.88rem;margin:0">
       Exits: mean post-sell +20d <span class="neg">-2.92%</span> ·
-      Rejections: mean +20d on rejected names <span class="neg">-0.78%</span> ·
-      correct avoids <strong>324</strong> ·
-      missed winners <strong>166</strong>
+      Rejections: mean +20d on rejected names <span class="neg">-0.81%</span> ·
+      correct avoids <strong>326</strong> ·
+      missed winners <strong>168</strong>
     </p>
   </div>
 </section>
